@@ -15,9 +15,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class WikidataDownloadCommand extends Command
+abstract class WikidataDownloadCommand extends Command
 {
-    protected static $defaultName = 'app:wikidata-download-forename';
+    protected static $defaultName;
 
     protected $slugGenerator;
     private $em;
@@ -43,8 +43,8 @@ class WikidataDownloadCommand extends Command
         $sc = new SparqlClient();
         $sc->setEndpointRead($endpoint);
 
-        $offset = 0;
-        $offsetStep = 10;
+        $offset = 60000;
+        $offsetStep = 10000;
         $continue = true;
 
         while ($continue) {
