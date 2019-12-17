@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ForenameRepository")
+ * @ORM\Table(indexes={@ORM\Index(name="idx_length", columns={"labels_length"}),@ORM\Index(name="idx_labels", columns={"labels"})})
  */
 class Forename
 {
@@ -30,6 +31,11 @@ class Forename
      * @ORM\Column(type="string", length=255)
      */
     private $labels;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $labelsLength;
 
     public function getId(): ?int
     {
@@ -68,6 +74,18 @@ class Forename
     public function setLabels(string $labels): self
     {
         $this->labels = $labels;
+
+        return $this;
+    }
+
+    public function getLabelsLength(): ?int
+    {
+        return $this->labelsLength;
+    }
+
+    public function setLabelsLength(int $labelsLength): self
+    {
+        $this->labelsLength = $labelsLength;
 
         return $this;
     }
