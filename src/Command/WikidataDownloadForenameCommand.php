@@ -2,6 +2,12 @@
 
 namespace App\Command;
 
+use App\Entity\Forename;
+use App\Repository\ForenameRepository;
+use App\Service\SlugGenerator;
+use BorderCloud\SPARQL\SparqlClient;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,6 +19,15 @@ class WikidataDownloadForenameCommand extends Command
 {
     protected static $defaultName = 'app:wikidata-download-forename';
 
+    private $slugGenerator;
+    private $em;
+
+    public function __construct(string $name = null, SlugGenerator $slugGenerator, EntityManagerInterface $em)
+    {
+        $this->slugGenerator = $slugGenerator;
+        $this->em = $em;
+        parent::__construct($name);
+    }
     protected function configure()
     {
         $this
@@ -24,8 +39,60 @@ class WikidataDownloadForenameCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $sparql = new EasyRdf_Sparql_Client('http://dbpedia.org/sparql');
-        
+        $endpoint = "https://query.wikidata.org/sparql";
+        $sc = new SparqlClient();
+        $sc->setEndpointRead($endpoint);
+
+        $offset = 0;
+        $offsetStep = 10000;
+        $continue = true;
+
+        while ($continue) {
+            print "Interrogation pour offset $offset\n";
+            $addedForIteration = 0;
+            $query = "SELECT ?forename ?forenameLabel
+            WHERE
+            {
+                ?forename wdt:P31/wdt:P279* wd:Q202444.
+                SERVICE wikibase:label { bd:serviceParam wikibase:language 'fr,en,de,es'. }
+            }
+            LIMIT $offsetStep
+            OFFSET $offset
+            ";
+
+
+            $rows = $sc->query($query, 'rows');
+
+            print "# réponse OK\n";
+            foreach ($rows["result"]["rows"] as $row) {
+                $forename = new Forename();
+                $forename->setLabel($row["forenameLabel"]);
+                $forename->setQ(str_replace("http://www.wikidata.org/entity/", "", $row["forename"]));
+                $forename->setLabels($this->slugGenerator->clean($forename->getLabel()));
+
+                if ($forename->getLabels() != "") {
+                    $this->em->persist($forename);
+                    $addedForIteration++;
+                }
+            }
+
+
+            print "# Persist OK\n";
+            $this->em->flush();
+
+            print "# Flush OK (+ $addedForIteration added)\n";
+            $offset += $offsetStep;
+
+            if ($addedForIteration == 0) {
+                $continue = false;
+            }
+        }
+
+
+
+
+
+        return false;
         $io = new SymfonyStyle($input, $output);
         $arg1 = $input->getArgument('arg1');
 

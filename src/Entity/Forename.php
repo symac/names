@@ -22,11 +22,6 @@ class Forename
     private $q;
 
     /**
-     * @ORM\Column(type="string", length=3)
-     */
-    private $lang;
-
-    /**
      * @ORM\Column(type="string", length=255)
      */
     private $label;
@@ -49,18 +44,6 @@ class Forename
     public function setQ(string $q): self
     {
         $this->q = $q;
-
-        return $this;
-    }
-
-    public function getLang(): ?string
-    {
-        return $this->lang;
-    }
-
-    public function setLang(string $lang): self
-    {
-        $this->lang = $lang;
 
         return $this;
     }
