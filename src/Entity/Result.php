@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -9,6 +11,11 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Result
 {
+    const STATUS_NEW = 0;
+    const STATUS_RUNNING = 1;
+    const STATUS_FINISH = 2;
+    const STATUS_ERROR = 3;
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -22,14 +29,25 @@ class Result
     private $slug;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\OneToMany(targetEntity="App\Entity\ResultStep", mappedBy="Result")
      */
-    private $lengthProcessed;
+    private $resultSteps;
 
     /**
-     * @ORM\Column(type="text", nullable=true)
+     * @ORM\Column(type="integer")
      */
-    private $results;
+    private $status;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $search;
+
+    public function __construct()
+    {
+        $this->status = Result::STATUS_NEW;
+        $this->resultSteps = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -48,26 +66,83 @@ class Result
         return $this;
     }
 
-    public function getLengthProcessed(): ?int
-    {
-        return $this->lengthProcessed;
+    public function nextForenameLengthNeeded() {
+        $maxLength = 3;
+        foreach ($this->getResultSteps() as $resultStep) {
+            if ($resultStep->getForenameLength() > $maxLength) {
+                $maxLength = $resultStep->getForenameLength();
+            }
+        }
+
+        if ($maxLength > (strlen($this->getSlug()) - 3)) {
+            return null;
+        }
+        return ($maxLength + 1);
     }
 
-    public function setLengthProcessed(int $lengthProcessed): self
+    /**
+     * @return Collection|ResultStep[]
+     */
+    public function getResultSteps(): Collection
     {
-        $this->lengthProcessed = $lengthProcessed;
+        return $this->resultSteps;
+    }
+
+    public function addResultStep(ResultStep $resultStep): self
+    {
+        if (!$this->resultSteps->contains($resultStep)) {
+            $this->resultSteps[] = $resultStep;
+            $resultStep->setResult($this);
+        }
 
         return $this;
     }
 
-    public function getResults(): ?string
+    public function removeResultStep(ResultStep $resultStep): self
     {
-        return $this->results;
+        if ($this->resultSteps->contains($resultStep)) {
+            $this->resultSteps->removeElement($resultStep);
+            // set the owning side to null (unless already changed)
+            if ($resultStep->getResult() === $this) {
+                $resultStep->setResult(null);
+            }
+        }
+
+        return $this;
     }
 
-    public function setResults(?string $results): self
+    public function getStatus(): ?int
     {
-        $this->results = $results;
+        return $this->status;
+    }
+
+    public function setStatus(int $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getFinished() {
+        return $this->status === Result::STATUS_FINISH;
+    }
+
+    public function countAnagrams() {
+        $count = 0;
+        foreach ($this->getResultSteps() as $resultStep) {
+            $count += sizeof($resultStep->getAnagrams());
+        }
+        return $count;
+    }
+
+    public function getSearch(): ?string
+    {
+        return $this->search;
+    }
+
+    public function setSearch(string $search): self
+    {
+        $this->search = $search;
 
         return $this;
     }

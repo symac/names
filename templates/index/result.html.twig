@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}APF - Anagram Pseudo Finder{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript">
+        var totalNumFound = 0;
+
+        var ready = (callback) => {
+            if (document.readyState != "loading") callback();
+            else document.addEventListener("DOMContentLoaded", callback);
+        }
+
+
+        function callJson() {
+            fetch("{{ url("ajax_result", {'name': search_name}) }}")
+                .then(function (response) {
+                    var contentType = response.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        return response.json().then(function (json) {
+                            if (json.status == 2) {
+                                document.querySelector("#numFound").textContent = totalNumFound + " anagrams found : finished ✔";
+                                console.log("Fin traitement");
+                            } else if (json.status == 1) {
+                                console.log("Traitement en cours");
+                                for (var i = 0; i < json.results.length; i++) {
+                                    console.log(json.results[i]);
+                                    var element = document.createElement("li");
+                                    element.textContent = json.results[i];
+                                    document.querySelector("#resultList").appendChild(element);
+                                }
+                                totalNumFound += json.results.length;
+                                document.querySelector("#numFound").textContent = totalNumFound + " found";
+                                callJson();
+                            } else {
+                                console.log("Autre statut");
+                                console.log(json);
+                            }
+                        });
+                    }
+                    console.log(contentType);
+                }).catch(error => {
+                alert("KO");
+            });
+        }
+
+        {% if not result.finished %}
+        ready(() => {
+            callJson();
+        });
+        {% endif %}
+
+    </script>
+
+{% endblock %}
+
+{% block body %}
+    <p>Anagrams for : {{ search_name }}</p>
+    {% if result.finished %}
+        <p id="numFound">{{ result.countAnagrams }} anagrams found: finished ✔</p>
+        <ul>
+        {% for resultStep in result.resultSteps %}
+            {% for anagram in resultStep.anagrams %}
+                <li>{{ anagram}}</li>
+                {% endfor %}
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p id="numFound"></p>
+        <ul id="resultList">
+        </ul>
+    {% endif %}
+{% endblock %}

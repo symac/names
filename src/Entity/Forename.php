@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Service\SlugGenerator;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -65,11 +66,6 @@ class Forename
      * @ORM\Column(type="integer")
      */
     private $labelsLength;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private $exported;
 
     /**
      * @ORM\Column(type="smallint", nullable=true, options={"default":0})
@@ -201,6 +197,12 @@ class Forename
      */
     private $Z = 0;
 
+    private $slugGenerator;
+    public function __construct(SlugGenerator $slugGenerator = null)
+    {
+        $this->slugGenerator = $slugGenerator;
+    }
+
     public function __set($name, $value)
     {
         $this->{$name} = $value;
@@ -218,6 +220,7 @@ class Forename
 
     public function setWikidata(string $wikidata): self
     {
+        $wikidata = preg_replace("#http://www.wikidata.org/entity/#", "", $wikidata);
         $this->wikidata = $wikidata;
 
         return $this;
@@ -230,7 +233,11 @@ class Forename
 
     public function setLabel(string $label): self
     {
+        chop($label);
         $this->label = $label;
+        $this->labels = $this->slugGenerator->clean($label);
+        $this->labelsLength = strlen($this->labels);
+        $this->updateCharsCount();
 
         return $this;
     }
@@ -243,8 +250,16 @@ class Forename
     public function setLabels(string $labels): self
     {
         $this->labels = $labels;
+        $this->setLabelsLength(strlen($this->labels));
+        $this->updateCharsCount();
 
         return $this;
+    }
+
+    private function updateCharsCount() {
+        foreach (count_chars($this->labels, 1) as $i => $val) {
+            $this->{chr($i)} = $val;
+        }
     }
 
     public function getLabelsLength(): ?int
@@ -255,18 +270,6 @@ class Forename
     public function setLabelsLength(int $labelsLength): self
     {
         $this->labelsLength = $labelsLength;
-
-        return $this;
-    }
-
-    public function getExported(): ?bool
-    {
-        return $this->exported;
-    }
-
-    public function setExported(bool $exported): self
-    {
-        $this->exported = $exported;
 
         return $this;
     }

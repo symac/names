@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Service\SlugGenerator;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -196,6 +197,17 @@ class Surname
      */
     private $Z = 0;
 
+    /**
+     * @ORM\Column(type="string", length=10)
+     */
+    private $language;
+
+    private $slugGenerator;
+    public function __construct(SlugGenerator $slugGenerator = null)
+    {
+        $this->slugGenerator = $slugGenerator;
+    }
+
     public function __set($name, $value)
     {
         $this->{$name} = $value;
@@ -213,8 +225,8 @@ class Surname
 
     public function setWikidata(string $wikidata): self
     {
+        $wikidata = preg_replace("#http://www.wikidata.org/entity/#", "", $wikidata);
         $this->wikidata = $wikidata;
-
         return $this;
     }
 
@@ -225,8 +237,11 @@ class Surname
 
     public function setLabel(string $label): self
     {
+        chop($label);
         $this->label = $label;
-
+        $this->labels = $this->slugGenerator->clean($label);
+        $this->labelsLength = strlen($this->labels);
+        $this->updateCharsCount();
         return $this;
     }
 
@@ -235,22 +250,27 @@ class Surname
         return $this->labels;
     }
 
-    public function setLabels(string $labels): self
-    {
-        $this->labels = $labels;
-
-        return $this;
-    }
-
     public function getLabelsLength(): ?int
     {
         return $this->labelsLength;
     }
 
-    public function setLabelsLength(int $labelsLength): self
+    public function getLanguage(): ?string
     {
-        $this->labelsLength = $labelsLength;
+        return $this->language;
+    }
+
+    public function setLanguage(string $language): self
+    {
+        $language = chop($language);
+        $this->language = $language;
 
         return $this;
+    }
+
+    private function updateCharsCount() {
+        foreach (count_chars($this->labels, 1) as $i => $val) {
+            $this->{chr($i)} = $val;
+        }
     }
 }
