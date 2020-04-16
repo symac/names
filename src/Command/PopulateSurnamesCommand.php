@@ -32,9 +32,7 @@ class PopulateSurnamesCommand extends Command
     protected function configure()
     {
         $this
-            ->setDescription('Downloading ')
-            ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
-            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
+            ->setDescription('Load from TSV File')
         ;
     }
 

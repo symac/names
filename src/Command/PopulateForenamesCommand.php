@@ -32,9 +32,7 @@ class PopulateForenamesCommand extends Command
     protected function configure()
     {
         $this
-            ->setDescription('Downloading ')
-            ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
-            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
+            ->setDescription('Load from TSV File')
         ;
     }
 
@@ -53,11 +51,11 @@ class PopulateForenamesCommand extends Command
         $io->title("Chargement d'un fichier des prénoms");
         $io->writeln("Les fichiers correspondent au résultat SparQL des deux requêtes suivantes : ");
         $io->title("Requête 1");
-        $io->writeln("SELECT distinct ?forename ?forenameLabel
+        $io->writeln("SELECT distinct ?forename (STR(?forenameLabelRaw) as ?forenameLabel)
 WHERE
 {
   ?forename wdt:P31/wdt:P279* wd:Q202444.
-  ?forename wdt:P1705 ?forenameLabel
+  ?forename wdt:P1705 ?forenameLabelRaw
 }");
         $io->title("Requête 2");
         $io->writeln("SELECT distinct ?forename ?forenameLabel
@@ -133,48 +131,5 @@ WHERE
         $this->em->flush();
 
         return 1;
-
-        exit;
-
-
-
-
-        $endpoint = "https://query.wikidata.org/sparql";
-        $sc = new SparqlClient();
-        $sc->setEndpointRead($endpoint);
-
-        $offset = $this->getOffsetStart();
-        $offsetStep = $this->getOffsetStep();
-        $continue = true;
-
-        $countLoops = 0;
-        while ($continue) {
-            print "Interrogation pour offset $offset\n";
-            $addedForIteration = 0;
-
-            $query = $this->getQuery($offset, $offsetStep);
-            $rows = $sc->query($query, 'rows');
-
-            print "# réponse OK\n";
-            foreach ($rows["result"]["rows"] as $row) {
-                $object = $this->getObjectFromSparqlRow($row);
-
-                if ($object)
-                {
-                    $this->em->persist($object);
-                    $addedForIteration++;
-                }
-            }
-
-            $countLoops++;
-            print "##### FLUSH (+ $addedForIteration) #####\n";
-            $this->em->flush();
-
-            $offset += $offsetStep;
-
-            if ($addedForIteration == 0) {
-                $continue = false;
-            }
-        }
     }
 }
