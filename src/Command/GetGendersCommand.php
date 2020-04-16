@@ -3,30 +3,26 @@
 namespace App\Command;
 
 use App\Entity\Forename;
-use App\Entity\Surname;
+use App\Repository\ForenameRepository;
 use App\Service\SlugGenerator;
-use BorderCloud\SPARQL\SparqlClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Finder\Finder;
-use EasyRdf_Parser_Exception;
 
 class GetGendersCommand extends Command
 {
     protected static $defaultName = 'app:get-genders';
 
-    protected $slugGenerator;
+    protected $forenameRepository;
     private $em;
 
-    public function __construct(string $name = null, SlugGenerator $slugGenerator, EntityManagerInterface $em)
+    public function __construct(string $name = null, EntityManagerInterface $em, ForenameRepository $forenameRepository)
     {
-        $this->slugGenerator = $slugGenerator;
+        $this->forenameRepository = $forenameRepository;
         $this->em = $em;
         parent::__construct($name);
     }
@@ -34,58 +30,84 @@ class GetGendersCommand extends Command
     protected function configure()
     {
         $this
-            ->setDescription('Getting genders ');
+            ->setDescription('Load genders from TSV File')
+        ;
     }
-
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
-
-        $endpoint = "https://query.wikidata.org/sparql";
-        $sc = new SparqlClient(true);
-        $sc->setEndpointRead($endpoint);
-
-        $query = "SELECT ?forename ?forenameType
+        $io->title("Chargement d'un fichier des prénoms");
+        $io->writeln("Les fichiers correspondent au résultat SparQL des deux requêtes suivantes : ");
+        $io->title("Requête :");
+        $io->writeln("SELECT distinct ?forename ?forenameType
 WHERE
 {
-  ?forename wdt:P31/wdt:P279* wd:Q202444 .
+  ?forename wdt:P31/wdt:P279*  wd:Q202444 .
   ?forename wdt:P31 ?forenameType .
-} LIMIT 10";
-        ini_set('memory_limit', '4000M');
-        // $rows = $sc->query($query, 'json' );
-        // Setup some additional prefixes for DBpedia
-        \EasyRdf_Namespace::set('category', 'http://dbpedia.org/resource/Category:');
-        \EasyRdf_Namespace::set('dbpedia', 'http://dbpedia.org/resource/');
-        \EasyRdf_Namespace::set('dbo', 'http://dbpedia.org/ontology/');
-        \EasyRdf_Namespace::set('dbp', 'http://dbpedia.org/property/');
+  MINUS {
+    ?forename wdt:P31 wd:Q202444
+  }
+}");
+        $io->writeLn("");
+        $io->writeln("<info>Sélection du fichier contenant  les ISBN : </info>");
+        $io->writeLn("");
 
-        $sparql = new \EasyRdf_Sparql_Client('https://query.wikidata.org/sparql');
 
-        $result = $sparql->query(
-            'SELECT * WHERE {'.
-            '  ?country rdf:type dbo:Country .'.
-            '  ?country rdfs:label ?label .'.
-            '  ?country dc:subject category:Member_states_of_the_United_Nations .'.
-            '  FILTER ( lang(?label) = "en" )'.
-            '} ORDER BY ?label'
+        $helper = $this->getHelper('question');
+        $finder = new Finder();
+        $directory_files = __DIR__."/../../var/sparql/";
+        $finder->files()->in($directory_files );
+        $choices = [];
+        foreach ($finder as $file) {
+            $choices[] = $directory_files."/".$file->getFilename();
+        }
+        $question = new ChoiceQuestion(
+            'Choisir le fichier contenant les résultats de la requête SPARQL',
+            $choices
         );
-        foreach ($result as $row) {
-            echo "<li>".link_to($row->label, $row->country)."</li>\n";
+        $question->setErrorMessage('Fichier invalide.');
+        $filename = $helper->ask($input, $output, $question);
+
+        $start = microtime(true);
+        $handle = @fopen($filename, "r");
+
+        $countUpdates = 1;
+        if ($handle) {
+            $lineNumber = 0;
+            while (($line = fgets($handle, 4096)) !== false) {
+                if ($lineNumber > 0) {
+                    $values = preg_split("/\t/", $line);
+                    $Qname = chop(str_replace("http://www.wikidata.org/entity/", "" ,$values[0]));
+                    $Qtype = chop(str_replace("http://www.wikidata.org/entity/", "" ,$values[1]));
+
+                    $forenames = $this->forenameRepository->findBy(["wikidata" => $Qname]);
+                    foreach ($forenames as $forename) {
+                        $updated = $forename->setGenderFromQType($Qtype);
+                        if ($updated) {
+                            $this->em->persist($forename);
+                            $countUpdates++;
+                        }
+                    }
+                }
+
+                if ( ($countUpdates % 5000) == 0) {
+                    print $countUpdates."\n";
+                    $duration = microtime(true) - $start;
+                    print "Import : $countUpdates - start flush [$duration]\n";
+                    $start = microtime(true);
+                    $this->em->flush();
+                    $duration = microtime(true) - $start;
+                    print "Import : $countUpdates - end flush [$duration]\n";
+                    $start = microtime(true);
+                }
+                $lineNumber++;
+            }
+
+            fclose($handle);
         }
-        dd($result);
-        exit;
-        
-        $err = $sc->getErrors();
-        if ($err) {
-            print_r($err);
-            throw new Exception(print_r($err, true));
-        }
-        dd($rows);
-        print "OK";
-        exit;
-        dd($rows);
-        dd(sizeof($rows["result"]["rows"]));
+        $this->em->flush();
+
         return 1;
     }
 }
