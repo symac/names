@@ -36,15 +36,6 @@ class PopulateForenamesCommand extends Command
         ;
     }
 
-    protected function getOffsetStart() {
-        return 46000;
-    }
-
-    protected function getOffsetStep() {
-        return 1000;
-    }
-
-
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);

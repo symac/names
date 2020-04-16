@@ -42,12 +42,14 @@ class PopulateSurnamesCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title("Chargement d'un fichier de noms de famille");
         $io->writeln("Les fichiers correspondent au résultat SparQL de la requête suivante : ");
-        $io->writeln("SELECT DISTINCT ?item ?itemLabel
+        $io->writeln("SELECT DISTINCT ?item ?itemLabel ?language
 WHERE 
 {
   ?item wdt:P31 wd:Q101352.
-  ?item wdt:P1705 ?itemLabel
-}");
+  ?item wdt:P1705 ?itemLabel.
+  BIND (LANG(?itemLabel) AS ?language)
+}
+");
 
         $io->writeLn("");
         $io->writeln("<info>Sélection du fichier contenant  les ISBN : </info>");
