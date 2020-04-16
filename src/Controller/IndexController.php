@@ -44,7 +44,6 @@ class IndexController extends AbstractController
                 $em->flush();
             }
             return $this->render('index/result.html.twig', [
-                'search_name' => $task["search_name"],
                 'result' => $result
             ]);
 
@@ -52,6 +51,19 @@ class IndexController extends AbstractController
         return $this->render('index/index.html.twig', [
             'controller_name' => 'IndexController',
             'form' => $form->createView()
+        ]);
+    }
+
+    /**
+     * @Route("/anagrams-of-{name}/{id}", name="permalink")
+     */
+    public function permalink(Result $result, string $name)
+    {
+        if ($result->getSearchSlugified() != $name) {
+            throw $this->createNotFoundException('The product does not exist');
+        }
+        return $this->render('index/result.html.twig', [
+            'result' => $result
         ]);
     }
 }

@@ -1,6 +1,98 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}APF - Anagram Pseudo Finder{% endblock %}
+
+{% block css %}
+    #progressBar {
+    position: relative;
+    width: 100%;
+    height: 30px;
+    background-color: #ddd;
+    }
+
+    #barStatus {
+    position: absolute;
+    width: 8%;
+    height: 100%;
+    background-color: #25F;
+    }
+
+    #share {
+        border:1px solid #999;
+        border-radius:5px;
+        font-size:0.8em;
+        padding:0.5em;
+    }
+
+    #numFound {
+    clear:both;
+    }
+
+    .loader,
+    .loader:before,
+    .loader:after {
+    border-radius: 50%;
+    width: 2.5em;
+    height: 2.5em;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    -webkit-animation: load7 1.8s infinite ease-in-out;
+    animation: load7 1.8s infinite ease-in-out;
+    }
+    .loader {
+    color: #2e0000;
+    font-size: 10px;
+    margin: 0px auto;
+    position: relative;
+    text-indent: -9999em;
+    -webkit-transform: translateZ(0);
+    -ms-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-animation-delay: -0.16s;
+    animation-delay: -0.16s;
+    }
+    .loader:before,
+    .loader:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    }
+    .loader:before {
+    left: -3.5em;
+    -webkit-animation-delay: -0.32s;
+    animation-delay: -0.32s;
+    }
+    .loader:after {
+    left: 3.5em;
+    }
+    @-webkit-keyframes load7 {
+    0%,
+    80%,
+    100% {
+    box-shadow: 0 2.5em 0 -1.3em;
+    }
+    40% {
+    box-shadow: 0 2.5em 0 0;
+    }
+    }
+    @keyframes load7 {
+    0%,
+    80%,
+    100% {
+    box-shadow: 0 2.5em 0 -1.3em;
+    }
+    40% {
+    box-shadow: 0 2.5em 0 0;
+    }
+    }
+
+    {% if not result.finished %}
+        #share {
+        visibility:hidden;
+        }
+    {% endif %}
+{% endblock %}
+
 {% block javascripts %}
     <script type="text/javascript">
         var totalNumFound = 0;
@@ -12,19 +104,24 @@
 
 
         function callJson() {
-            fetch("{{ url("ajax_result", {'name': search_name}) }}")
+            fetch("{{ url("ajax_result", {'name': result.search}) }}")
                 .then(function (response) {
                     var contentType = response.headers.get("content-type");
                     if (contentType && contentType.indexOf("application/json") !== -1) {
                         return response.json().then(function (json) {
+                            let progressBar = document.getElementById("barStatus");
+                            progressBar.style.width = json.percent + '%';
+
                             if (json.status == 2) {
-                                document.querySelector("#numFound").textContent = totalNumFound + " anagrams found : finished ✔";
-                                console.log("Fin traitement");
+                                document.querySelector("#progressBar").style.display = "none";
+                                document.querySelector(".loader").style.display = "none";
+                                document.querySelector("#numFound").innerHTML = totalNumFound + " anagrams found : <strong>finished ✔</strong> (<a href='{{ url('permalink', {name: result.searchSlugified, id: result.id}) }}'>sort alphabetically</a>)";
+                                document.querySelector("#share").style.visibility = "visible";
                             } else if (json.status == 1) {
                                 console.log("Traitement en cours");
-                                for (var i = 0; i < json.results.length; i++) {
+                                for (let i = 0; i < json.results.length; i++) {
                                     console.log(json.results[i]);
-                                    var element = document.createElement("li");
+                                    let element = document.createElement("li");
                                     element.textContent = json.results[i];
                                     document.querySelector("#resultList").appendChild(element);
                                 }
@@ -54,17 +151,26 @@
 {% endblock %}
 
 {% block body %}
-    <p>Anagrams for : {{ search_name }}</p>
     {% if result.finished %}
-        <p id="numFound">{{ result.countAnagrams }} anagrams found: finished ✔</p>
+        <h2>{{ result.countAnagrams }} anagrams found for : {{ result.search }}</h2>
+    {% else %}
+        <h2>Search anagrams for : {{ result.search }}</h2>
+    {% endif %}
+    <div id="share">Share this result : <a
+                href="{{ url("permalink", {name: result.searchSlugified, id: result.id}) }}">{{ url("permalink", {name: result.searchSlugified, id: result.id}) }}</a>
+    </div>
+    {% if result.finished %}
         <ul>
-        {% for resultStep in result.resultSteps %}
-            {% for anagram in resultStep.anagrams %}
-                <li>{{ anagram}}</li>
-                {% endfor %}
-        {% endfor %}
+            {% for anagram in result.getSortedAnagrams %}
+                <li>{{ anagram }}</li>
+            {% endfor %}
         </ul>
     {% else %}
+        <div id="progressBar">
+            <div id="barStatus"></div>
+        </div>
+        <div class="loader">Loading...</div>
+
         <p id="numFound"></p>
         <ul id="resultList">
         </ul>

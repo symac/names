@@ -43,6 +43,8 @@ class Result
      */
     private $search;
 
+    private $percentageDone;
+
     public function __construct()
     {
         $this->status = Result::STATUS_NEW;
@@ -66,7 +68,8 @@ class Result
         return $this;
     }
 
-    public function nextForenameLengthNeeded() {
+    public function nextForenameLengthNeeded()
+    {
         $maxLength = 3;
         foreach ($this->getResultSteps() as $resultStep) {
             if ($resultStep->getForenameLength() > $maxLength) {
@@ -123,11 +126,13 @@ class Result
         return $this;
     }
 
-    public function getFinished() {
+    public function getFinished()
+    {
         return $this->status === Result::STATUS_FINISH;
     }
 
-    public function countAnagrams() {
+    public function countAnagrams()
+    {
         $count = 0;
         foreach ($this->getResultSteps() as $resultStep) {
             $count += sizeof($resultStep->getAnagrams());
@@ -140,10 +145,51 @@ class Result
         return $this->search;
     }
 
+    public function getSearchSlugified(): ?string
+    {
+        $str = str_replace([], ' ', $this->getSearch());
+        $clean = iconv('UTF-8', 'ASCII//TRANSLIT', $str);
+        $clean = preg_replace("/[^a-zA-Z0-9\/_|+ -]/", '', $clean);
+        $clean = strtolower(trim($clean, '-'));
+        $clean = preg_replace("/[\/_|+ -]+/", "-", $clean);
+        return $clean;
+    }
+
     public function setSearch(string $search): self
     {
         $this->search = $search;
 
         return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPercentageDone(): int
+    {
+        if ($this->percentageDone) {
+            return $this->percentageDone;
+        }
+
+        return intval( ($this->nextForenameLengthNeeded() * 100) / strlen($this->getSlug()) );
+    }
+
+    /**
+     * @param mixed $percentageDone
+     */
+    public function setPercentageDone($percentageDone): void
+    {
+        $this->percentageDone = $percentageDone;
+    }
+
+    public function getSortedAnagrams(): array
+    {
+        $output = [];
+        $steps = $this->getResultSteps();
+        foreach ($steps as $step) {
+            $output = array_merge($output, $step->getAnagrams());
+        }
+        sort($output);
+        return $output;
     }
 }

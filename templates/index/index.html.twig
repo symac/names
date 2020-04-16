@@ -2,11 +2,28 @@
 
 {% block title %}APF - Anagram Pseudo Finder{% endblock %}
 
+{% block css %}
+    input {
+    height:2em;
+    width:60%;
+    }
+
+    button {
+    display: inline-block;
+    font-size:1.5em;
+    }
+
+
+{% endblock %}
+
 {% block body %}
-    <p>This tool will, based on a real name, try to find an anagram that looks like a real name. The data used are coming from <a href="https://www.wikidata.org">Wikidata</a>.</p>
+    <p>This tool will, based on a real name, try to find an anagram that looks like a real name. The data used are
+        coming from <a href="https://www.wikidata.org">Wikidata</a>.</p>
     <p>Please enter the name you want to <i>anagramized</i>:
+    <div style="text-align: center;">
         {{ form_start(form) }}
         {{ form_widget(form.search_name) }}
         {{ form_end(form) }}
+    </div>
     </p>
 {% endblock %}

@@ -43,6 +43,7 @@ class AjaxController extends AbstractController
         $forenameLengthNeeded = $result->nextForenameLengthNeeded();
         if (is_null($forenameLengthNeeded)) {
             $result->setStatus(Result::STATUS_FINISH);
+            $result->setPercentageDone(100);
         } else {
             $result->setStatus(Result::STATUS_RUNNING);
             $resultStep = new ResultStep();
@@ -57,7 +58,7 @@ class AjaxController extends AbstractController
             $output["results"] = $resultStep->getAnagrams();
             $output["duration"] = $resultStep->getDuration();
         }
-
+        $output["percent"] = $result->getPercentageDone();
         $output["status"] = $result->getStatus();
         $em->persist($result);
         $em->flush();
