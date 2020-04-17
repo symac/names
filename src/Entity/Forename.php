@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(indexes={
  *     @ORM\Index(name="idx_length", columns={"labels_length"}),
  *     @ORM\Index(name="idx_labels", columns={"labels"}),
+ *     @ORM\Index(name="idx_label", columns={"label"}),
  *     @ORM\Index(name="idx_wikidata", columns={"wikidata"}),
  *     @ORM\Index(name="searchA", columns={"A"}),
  *     @ORM\Index(name="searchB", columns={"B"}),
@@ -55,7 +56,7 @@ class Forename
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=32)
+     * @ORM\Column(type="string", length=255)
      */
     private $wikidata;
 
@@ -231,13 +232,26 @@ class Forename
         return $this->wikidata;
     }
 
+    private function cleanWikidata(string $wikidata): string
+    {
+        return preg_replace("#http://www.wikidata.org/entity/#", "", $wikidata);
+    }
+
     public function setWikidata(string $wikidata): self
     {
-        $wikidata = preg_replace("#http://www.wikidata.org/entity/#", "", $wikidata);
+        $wikidata = $this->cleanWikidata($wikidata);
         $this->wikidata = $wikidata;
 
         return $this;
     }
+
+    public function appendWikidata(string $wikidata): self
+    {
+        $wikidata = $this->cleanWikidata($wikidata);
+        $this->setWikidata($this->getWikidata()."#".$wikidata);
+        return $this;
+    }
+
 
     public function getLabel(): ?string
     {
@@ -363,8 +377,7 @@ class Forename
         } else {
             print $Q . "\n";
             print $convertedType . "\n";
-            print "DEALLL";
-            exit;
+            print "DEALLL\n";
         }
     }
 }

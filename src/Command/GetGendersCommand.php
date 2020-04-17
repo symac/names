@@ -81,7 +81,7 @@ WHERE
                     $Qname = chop(str_replace("http://www.wikidata.org/entity/", "" ,$values[0]));
                     $Qtype = chop(str_replace("http://www.wikidata.org/entity/", "" ,$values[1]));
 
-                    $forenames = $this->forenameRepository->findBy(["wikidata" => $Qname]);
+                    $forenames = $this->forenameRepository->findByWikidata($Qname);
                     foreach ($forenames as $forename) {
                         $updated = $forename->setGenderFromQType($Qtype);
                         if ($updated) {
@@ -91,7 +91,7 @@ WHERE
                     }
                 }
 
-                if ( ($countUpdates % 5000) == 0) {
+                if ( ($countUpdates % 50) == 0) {
                     print $countUpdates."\n";
                     $duration = microtime(true) - $start;
                     print "Import : $countUpdates - start flush [$duration]\n";

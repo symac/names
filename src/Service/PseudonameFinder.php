@@ -24,7 +24,7 @@ class PseudonameFinder
         $tableSurname = $this->em->getClassMetadata(Forename::class)->getTableName();
         $tableForname = $this->em->getClassMetadata(Surname::class)->getTableName();
 
-        $query = "select distinct A.label as surname, B.label as forename from $tableSurname as A, $tableForname as B WHERE ";
+        $query = "select distinct A.label as surname, A.wikidata as qs, B.label as forename, B.wikidata as qf, A.gender as gender from $tableSurname as A, $tableForname as B WHERE ";
 
         $lettersSlug = [];
         $lettersSlugCode = count_chars($slug, 1);
@@ -64,12 +64,17 @@ class PseudonameFinder
         $stmt->execute();
 
         $results = $stmt->fetchAll(2);
-        $resultsNumber = sizeof($results);
+
         $matchingSlugs = 0;
         foreach ($results as $result) {
-            $suggestion = $result["surname"] . " " . $result["forename"];
-            $slugCombined = $this->slugGenerator->clean($suggestion);
-
+            $suggestion = [
+                "g" => $result["gender"],
+                "f" => $result["forename"],
+                "s" => $result["surname"],
+                "qf" => $result["qf"],
+                "qs" => $result["qs"]
+            ];
+            $slugCombined = $this->slugGenerator->clean($suggestion["s"] . $suggestion["f"]);
             if ($slugCombined == $slug) {
                 $outputResults[] = $suggestion;
                 $matchingSlugs++;

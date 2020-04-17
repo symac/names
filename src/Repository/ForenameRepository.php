@@ -19,6 +19,28 @@ class ForenameRepository extends ServiceEntityRepository
         parent::__construct($registry, Forename::class);
     }
 
+    public function findByWikidata(string $wikidata) {
+        $forenames = $this->findBy(["wikidata" => $wikidata]);
+
+        if (sizeof($forenames) > 0)
+        {
+            return $forenames;
+        }
+
+        // Looking for a forename with multiple wikidata
+        $qb = $this->createQueryBuilder('f');
+
+        $qb->select()
+            ->where($qb->expr()->like('f.wikidata', '?1'))
+            ->setParameter(1, "%".$wikidata."%");
+
+        $forenames = $qb->getQuery()->getResult();
+        if (sizeof($forenames) > 0) {
+            return $forenames;
+        }
+        return [];
+    }
+
     // /**
     //  * @return Forename[] Returns an array of Forename objects
     //  */

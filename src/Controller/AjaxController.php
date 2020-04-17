@@ -31,7 +31,6 @@ class AjaxController extends AbstractController
     {
         $output = [];
 
-
         $slug = $slugGenerator->clean($name);
         $result = $resultRepository->findOneBy(["slug" => $slug]);
         if (!$result) {

@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Forename;
 use App\Entity\Surname;
+use App\Repository\ForenameRepository;
 use App\Service\SlugGenerator;
 use BorderCloud\SPARQL\SparqlClient;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,18 +23,20 @@ class PopulateForenamesCommand extends Command
 
     protected $slugGenerator;
     private $em;
+    private $forenameRepository;
 
-    public function __construct(string $name = null, SlugGenerator $slugGenerator, EntityManagerInterface $em)
+    public function __construct(string $name = null, SlugGenerator $slugGenerator, EntityManagerInterface $em, ForenameRepository $forenameRepository)
     {
         $this->slugGenerator = $slugGenerator;
         $this->em = $em;
+        $this->forenameRepository = $forenameRepository;
         parent::__construct($name);
     }
+
     protected function configure()
     {
         $this
-            ->setDescription('Load from TSV File')
-        ;
+            ->setDescription('Load from TSV File');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -66,14 +69,13 @@ WHERE
         $io->writeln("<info>Sélection du fichier contenant  les ISBN : </info>");
         $io->writeLn("");
 
-
         $helper = $this->getHelper('question');
         $finder = new Finder();
-        $directory_files = __DIR__."/../../var/sparql/";
-        $finder->files()->in($directory_files );
+        $directory_files = __DIR__ . "/../../var/sparql/";
+        $finder->files()->in($directory_files);
         $choices = [];
         foreach ($finder as $file) {
-            $choices[] = $directory_files."/".$file->getFilename();
+            $choices[] = $directory_files . "/" . $file->getFilename();
         }
         $question = new ChoiceQuestion(
             'Choisir le fichier contenant les résultats de la requête SPARQL',
@@ -86,30 +88,57 @@ WHERE
         $start = microtime(true);
         $handle = @fopen($filename, "r");
 
+        $doneSession = [];
+
         if ($handle) {
             $lineNumber = 0;
             $countImports = 0;
             while (($line = fgets($handle, 4096)) !== false) {
                 if ($lineNumber > 0) {
+                    $line = chop($line);
                     $values = preg_split("/\t/", $line);
+
                     if (!preg_match("/^Q\d*$/", $values[1])) {
+                        $label = $values[1];
                         $forename = new Forename($this->slugGenerator);
                         $forename->setWikidata($values[0]);
-                        $forename->setLabel($values[1]);
-                        if ($forename->getLabelsLength() < 250) {
-                            $this->em->persist($forename);
-                        }
-                        $countImports++;
-                    }
+                        $forename->setLabel($label);
 
+                        $labelSearch = strtoupper(iconv('utf-8', 'us-ascii//TRANSLIT', $label));
+                        if (preg_match("/\?/", $labelSearch)) {
+                            # Convert to latin1 does not work, we skip
+                        } else {
+                            if (isset($doneSession[$labelSearch])) {
+
+                                $doneSession = [];
+                                $this->em->flush();
+                            }
+
+                            $previousForename = $this->forenameRepository->findOneBy(["label" => $label]);
+
+                            if (!is_null($previousForename)) {
+                                $previousForename->appendWikidata($forename->getWikidata());
+                                $this->em->persist($previousForename);
+                            }
+                            else {
+                                if ($forename->getLabelsLength() < 250) {
+                                    $this->em->persist($forename);
+                                    $doneSession[$labelSearch] = $forename;
+                                    $countImports++;
+                                } else {
+                                    print "Skip ".$forename->getLabel()."\n";
+                                }
+                            }
+                        }
+                    }
                 }
 
-                if ( ($countImports % 5000) == 0) {
-                    print $countImports."\n";
+                if (($countImports % 5000) == 0) {
+
                     $duration = microtime(true) - $start;
                     print "Import : $countImports - start flush [$duration]\n";
                     $start = microtime(true);
-                    $this->em->flush();
+
                     $duration = microtime(true) - $start;
                     print "Import : $countImports - end flush [$duration]\n";
                     $start = microtime(true);
