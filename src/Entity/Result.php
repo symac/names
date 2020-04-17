@@ -190,7 +190,8 @@ class Result
             $output = array_merge($output, $step->getAnagrams());
         }
 
-        usort($output, function($a, $b) { return $a["s"]." ".$a["f"] <=> $b["s"]." ".$b["f"]; });
+        $c = new \Collator('fr_FR');
+        usort($output, function($a, $b) use ($c) { return $c->compare($a["s"]." ".$a["f"], $b["s"]." ".$b["f"]); });
         return $output;
     }
 }
