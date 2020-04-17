@@ -2,93 +2,19 @@
 
 {% block title %}APF - Anagram Pseudo Finder{% endblock %}
 
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/result.css') }}"/>
+{% endblock %}
+
 {% block css %}
-    #progressBar {
-    position: relative;
-    width: 100%;
-    height: 30px;
-    background-color: #ddd;
-    }
-
-    #barStatus {
-    position: absolute;
-    width: 8%;
-    height: 100%;
-    background-color: #25F;
-    }
-
-    #share {
-        border:1px solid #999;
-        border-radius:5px;
-        font-size:0.8em;
-        padding:0.5em;
-    }
-
-    #numFound {
-    clear:both;
-    }
-
-    .loader,
-    .loader:before,
-    .loader:after {
-    border-radius: 50%;
-    width: 2.5em;
-    height: 2.5em;
-    -webkit-animation-fill-mode: both;
-    animation-fill-mode: both;
-    -webkit-animation: load7 1.8s infinite ease-in-out;
-    animation: load7 1.8s infinite ease-in-out;
-    }
-    .loader {
-    color: #2e0000;
-    font-size: 10px;
-    margin: 0px auto;
-    position: relative;
-    text-indent: -9999em;
-    -webkit-transform: translateZ(0);
-    -ms-transform: translateZ(0);
-    transform: translateZ(0);
-    -webkit-animation-delay: -0.16s;
-    animation-delay: -0.16s;
-    }
-    .loader:before,
-    .loader:after {
-    content: '';
-    position: absolute;
-    top: 0;
-    }
-    .loader:before {
-    left: -3.5em;
-    -webkit-animation-delay: -0.32s;
-    animation-delay: -0.32s;
-    }
-    .loader:after {
-    left: 3.5em;
-    }
-    @-webkit-keyframes load7 {
-    0%,
-    80%,
-    100% {
-    box-shadow: 0 2.5em 0 -1.3em;
-    }
-    40% {
-    box-shadow: 0 2.5em 0 0;
-    }
-    }
-    @keyframes load7 {
-    0%,
-    80%,
-    100% {
-    box-shadow: 0 2.5em 0 -1.3em;
-    }
-    40% {
-    box-shadow: 0 2.5em 0 0;
-    }
-    }
 
     {% if not result.finished %}
         #share {
-        visibility:hidden;
+        display:none;
+        }
+
+        #filter {
+        display:none;
         }
     {% endif %}
 {% endblock %}
@@ -114,15 +40,16 @@
 
                             if (json.status == 2) {
                                 document.querySelector("#progressBar").style.display = "none";
-                                document.querySelector(".loader").style.display = "none";
                                 document.querySelector("#numFound").innerHTML = totalNumFound + " anagrams found : <strong>finished ✔</strong> (<a href='{{ url('permalink', {name: result.searchSlugified, id: result.id}) }}'>sort alphabetically</a>)";
-                                document.querySelector("#share").style.visibility = "visible";
+                                document.querySelector("#share").style.display = "block";
+                                document.querySelector("#filter").style.display = "block";
+                                document.querySelector("#loader").style.display = "none";
                             } else if (json.status == 1) {
-                                console.log("Traitement en cours");
                                 for (let i = 0; i < json.results.length; i++) {
-                                    console.log(json.results[i]);
                                     let element = document.createElement("li");
-                                    element.textContent = json.results[i];
+                                    element.textContent = json.results[i]['s'] + " " + json.results[i]['f'];
+                                    element.className = "gender" + json.results[i]["g"];
+                                    element.classList.add("gender");
                                     document.querySelector("#resultList").appendChild(element);
                                 }
                                 totalNumFound += json.results.length;
@@ -140,12 +67,28 @@
             });
         }
 
-        {% if not result.finished %}
-        ready(() => {
-            callJson();
-        });
-        {% endif %}
+        function filterResults(buttonId) {
+            buttonId = buttonId.replace("btnFilter", "");
+            for (i = 1; i <= 2; i++) {
+                if (i == parseInt(buttonId)) {
+                    document.querySelectorAll(".gender" + i).forEach(a => a.style.display = "block");
+                } else {
+                    document.querySelectorAll(".gender" + i).forEach(a => a.style.display = "none");
+                }
+            }
+        }
 
+        ready(() => {
+            {% if not result.finished %}
+           callJson();
+            {% endif %}
+            document.addEventListener('click', function (event) {
+                if ((event.target.id == "btnFilter0") || (event.target.id == "btnFilter1") || (event.target.id == "btnFilter2")) {
+                    filterResults(event.target.id);
+                }
+            }, false);
+
+        });
     </script>
 
 {% endblock %}
@@ -159,20 +102,30 @@
     <div id="share">Share this result : <a
                 href="{{ url("permalink", {name: result.searchSlugified, id: result.id}) }}">{{ url("permalink", {name: result.searchSlugified, id: result.id}) }}</a>
     </div>
+    <div id="filter">
+        <p>Limit to :
+            <button class="btnFilter" id='btnFilter1'>Female, unisex & unknown</button>
+            <button class="btnFilter" id='btnFilter2'>Male, unisex & unknown</button>
+        </p>
+    </div>
     {% if result.finished %}
-        <ul>
-            {% for anagram in result.getSortedAnagrams %}
-                <li>{{ anagram }}</li>
-            {% endfor %}
-        </ul>
+
+        <div id="resultDiv">
+            <ul id="resultList">
+                {% for anagram in result.getSortedAnagrams %}
+                    <li class="gender gender{{ anagram.g }}">{{ anagram.s }} {{ anagram.f }}</li>
+                {% endfor %}
+            </ul>
+        </div>
     {% else %}
+        <div id="loader">Loading...</div>
+        <p id="numFound"></p>
         <div id="progressBar">
             <div id="barStatus"></div>
         </div>
-        <div class="loader">Loading...</div>
-
-        <p id="numFound"></p>
-        <ul id="resultList">
-        </ul>
+        <div id="resultDiv">
+            <ul id="resultList">
+            </ul>
+        </div>
     {% endif %}
 {% endblock %}
