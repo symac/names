@@ -171,7 +171,7 @@ class Result
             return $this->percentageDone;
         }
 
-        return intval( ($this->nextForenameLengthNeeded() * 100) / strlen($this->getSlug()) );
+        return intval( (($this->nextForenameLengthNeeded() - 2 )* 100) / (strlen($this->getSlug()) - 2) );
     }
 
     /**
@@ -189,7 +189,8 @@ class Result
         foreach ($steps as $step) {
             $output = array_merge($output, $step->getAnagrams());
         }
-        sort($output);
+
+        usort($output, function($a, $b) { return $a["s"]." ".$a["f"] <=> $b["s"]." ".$b["f"]; });
         return $output;
     }
 }
