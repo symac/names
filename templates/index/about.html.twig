@@ -14,7 +14,20 @@
 {% block body %}
 <dl>
     <dt>Where do the data come from?</dt>
-    <dd>Everything is coming from <a href="https://www.wikidata.org">Wikidata</a>, the sister project of Wikipedia. All this data is freely available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.fr">CC-0 license</a></dd>
+    <dd>
+        <p>Everything is coming from <a href="https://www.wikidata.org">Wikidata</a>, the sister project of Wikipedia. All this data is freely available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.fr">CC-0 license</a></p>
+        <p>Data has been harvested in April 2020 using SPARQL Queries (might need some improvement but works for this proof of concept!):
+            <ul>
+            <li>A first one to get all forenames that contain a property P1705 (<i>native label</i>): <a href="https://w.wiki/NCP">https://w.wiki/NCP</a></li>
+            <li>A second one for all forenames that have not been found using the previous query to get their labels in some languages when they exist: <a href="https://w.wiki/NCR">https://w.wiki/NCR</a></li>
+            <li>A third one to get all surnames and their native label : <a href="https://w.wiki/NCS">https://w.wiki/NCS</a></li>
+        </ul>
+        </p>
+
+    </dd>
+
+    <dt>Are the strings used all real names?</dt>
+    <dd>Yes they are, at least that is how they are described on wikidata. We are not sure that the combination of the surname and forename exist somewhere in the world but all the results are forename and surnames.</dd>
 
     <dt>How many names ares used to compute the anagrams?</dt>
     <dd>The database contains {{ countForenames | number_format }} forenames and {{ countSurnames | number_format }} surnames.</dd>
