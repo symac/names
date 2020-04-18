@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello QuizzController!{% endblock %}
+
+{% block body %}
+    <h1>Adding quizz - select anagram</h1>
+
+    <div>
+        {% if result.finished %}
+            <ul>
+            {% for anagram in result.sortedAnagrams %}
+                <li class="gender gender{{ anagram.g }}">{{ anagram.s }} {{ anagram.f }} &rarr; <a href="{{ url("quizz_add_final", {anagram : anagram.s ~ " " ~ anagram.f, secret: quizz.secret, id: quizz.id}) }}">choose this one</a></li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            {% include "includes/result_list.html.twig" %}
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/result.css') }}"/>
+{% endblock %}
+
+{% block javascripts %}
+    {% include "includes/result_js.html.twig" %}
+
+    <script type="text/javascript">
+        var totalNumFound = 0;
+
+        function filterResults(buttonId) {
+            buttonId = buttonId.replace("btnFilter", "");
+            for (i = 1; i <= 2; i++) {
+                if (i == parseInt(buttonId)) {
+                    document.querySelectorAll(".gender" + i).forEach(a => a.style.display = "block");
+                } else {
+                    document.querySelectorAll(".gender" + i).forEach(a => a.style.display = "none");
+                }
+            }
+        }
+
+        ready(() => {
+            {% if not result.finished %}
+            callJson();
+            {% endif %}
+            document.addEventListener('click', function (event) {
+                if ((event.target.id == "btnFilter0") || (event.target.id == "btnFilter1") || (event.target.id == "btnFilter2")) {
+                    filterResults(event.target.id);
+                }
+            }, false);
+
+        });
+    </script>
+{% endblock %}

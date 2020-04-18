@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello QuizzController!{% endblock %}
+
+{% block body %}
+    <h1>Ajout d'un quizz</h1>
+
+    <div>
+        {{ form_start(form) }}
+        {{ form(form) }}
+
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

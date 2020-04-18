@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block css %}
+#answer{
+    visibility:hidden;
+}
+{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript">
+        ready(() => {
+            document.addEventListener('click', function (event) {
+                if (event.target.id == "show_answer") {
+                    document.querySelector("#answer").style.visibility = "visible";
+                }
+            }, false);
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+    <h1>{{ quizz.anagram }}</h1>
+    <p>
+        {{ quizz.question }}
+        <br/>
+        <a href="#" id="show_answer">Show me</a>
+    </p>
+
+    <p id="answer">{{ quizz.answer }}</p>
+    <hr/>
+    <a href="{{ url('quizz_random') }}">See another one</a>
+{% endblock %}

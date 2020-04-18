@@ -28,8 +28,7 @@ class IndexController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $task = $form->getData();
             $searchName = $task["search_name"];
-            $slugName = $slugGenerator->clean($searchName);
-            $result = $resultRepository->findOneBy(["slug" => $slugName]);
+            $result = $resultRepository->findOneBy(["search" => $searchName]);
 
             if ((!is_null($result)) && ($result->getStatus() == Result::STATUS_FINISH)) {
                 return $this->render('index/result.html.twig', [
@@ -39,8 +38,7 @@ class IndexController extends AbstractController
             }
 
             if (is_null($result)) {
-                $result = new Result();
-                $result->setSlug($slugName);
+                $result = new Result($slugGenerator);
                 $result->setSearch($searchName);
                 $em->persist($result);
                 $em->flush();
