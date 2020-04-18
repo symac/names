@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Forename;
 use App\Entity\Result;
+use App\Entity\Surname;
 use App\Form\SearchType;
 use App\Repository\ResultRepository;
 use App\Service\SlugGenerator;
@@ -64,6 +66,21 @@ class IndexController extends AbstractController
         }
         return $this->render('index/result.html.twig', [
             'result' => $result
+        ]);
+    }
+
+    /**
+     * @Route("/about", name="about")
+     */
+    public function about(EntityManagerInterface $em)
+    {
+        $countForenames = $em->getRepository(Forename::class)->createQueryBuilder('a')->select('count(a.id)')->getQuery()->getSingleScalarResult();
+        $countSurnames = $em->getRepository(Surname::class)->createQueryBuilder('a')->select('count(a.id)')->getQuery()->getSingleScalarResult();
+        $countAnagrams = $em->getRepository(Result::class)->createQueryBuilder('a')->select('count(a.id)')->getQuery()->getSingleScalarResult();
+        return $this->render('index/about.html.twig', [
+            "countSurnames" => $countSurnames,
+            "countForenames" => $countForenames,
+            "countAnagrams" => $countAnagrams
         ]);
     }
 }

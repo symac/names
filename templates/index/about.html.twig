@@ -1,0 +1,35 @@
+{% extends "base.html.twig" %}
+{% block title %}About - APF - Anagram Pseudo Finder{% endblock %}
+
+{% block css %}
+    dt {
+        font-weight:bold
+    }
+
+    dd {
+        margin-bottom:1em;
+    }
+{% endblock %}
+
+{% block body %}
+<dl>
+    <dt>Where do the data come from?</dt>
+    <dd>Everything is coming from <a href="https://www.wikidata.org">Wikidata</a>, the sister project of Wikipedia. All this data is freely available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.fr">CC-0 license</a></dd>
+
+    <dt>How many names ares used to compute the anagrams?</dt>
+    <dd>The database contains {{ countForenames | number_format }} forenames and {{ countSurnames | number_format }} surnames.</dd>
+
+    <dt>How many names have been anagramized?</dt>
+    <dd>{{ countAnagrams | number_format}} names are currently cached in the database.</dd>
+
+    <dt>How does it work?</dt>
+    <dd><p>Combining each forename with each surname in the database would result in some billions of names ({{ (countForenames * countSurnames) | number_format }} to be exact which is quite complicate to process, especially on a small server like this one. After thinking about it for some time, <a href="https://stackoverflow.com/questions/59382183/finding-anagrams-from-two-mysql-tables">asking advice on StackOverflow</a>, the solution I have found is the following one.</p>
+        <p>The database consists of one table for the forenames and one for the surnames. Each one contains one column for the name, one column for the length of the name and 26 columns, one for each letter, with an index on each of these columns. When you input a name on this website, a request is sent to the server asking for anagrams with a forename containing fours characters (forenames with less than 4 characters are excluded), the SQL query built looks like this (<a href="https://gist.github.com/symac/d02ff65ad61d389f2b9940d0ba557675">direct link to this query on github</a>) : </p>
+        <script src="https://gist.github.com/symac/d02ff65ad61d389f2b9940d0ba557675.js"></script>
+        <p>When the result for 4 characters forenames is returned, a new query is sent for 5 characters and so on. By splitting the query into multiple requests we are able to get the final result in a reasonable time.</p>
+    </dd>
+
+    <dt>There is an issue, who can I contact?</dt>
+    <dd>On <a href="https://www.twitter.com/symac">Twitter @symac</a> or using the email address you'll find <a href="http://www.geobib.fr/contact">on this page</a>.</dd>
+</dl>
+{% endblock %}
