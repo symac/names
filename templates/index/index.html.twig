@@ -17,13 +17,13 @@
 {% endblock %}
 
 {% block body %}
-    <p>This tool will, based on a real name, try to find an anagram that looks like a real name. The data used are
-        coming from <a href="https://www.wikidata.org">Wikidata</a>.</p>
-    <p>Please enter the name you want to <i>anagramized</i>:
+    <p>Do you know the famous people behind these anagrams: <a href="http://apf.geobib.fr/anagrams-of-isaac-newton/436">Owen Castani</a>, <a href="http://apf.geobib.fr/anagrams-of-marilyn-monroe/442">Elionor Myrman</a> or <a href="http://apf.geobib.fr/anagrams-of-mickael-jackson/444">Aleksij Cockman</a>?.</p>
     <div style="text-align: center;">
+        <p><span style="font-size:2em">Find yours</span><br/>
+            <span style="font-size:2em">⬇</span>
         {{ form_start(form) }}
         {{ form_widget(form.search_name) }}
         {{ form_end(form) }}
+        </p>
     </div>
-    </p>
 {% endblock %}
