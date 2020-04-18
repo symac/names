@@ -1,4 +1,5 @@
 <?php
+setlocale(LC_ALL, 'fr_FR.UTF-8');
 
 use App\Kernel;
 use Symfony\Component\ErrorHandler\Debug;
