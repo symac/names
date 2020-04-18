@@ -56,11 +56,11 @@ class CleanDatabaseCommand extends Command
         $io->writeln(" > $count deletions\n");
 
         $io->writeln("Deleting very small forenames");
-        $count = $this->runSql('DELETE FROM `forename` where LENGTH(label) <= 2;');
+        $count = $this->runSql('DELETE FROM `forename` where labels_length <= 3;');
         $io->writeln(" > $count deletions\n");
 
         $io->writeln("Deleting very small surnames");
-        $count = $this->runSql('DELETE FROM `surname` where LENGTH(label) <= 2;');
+        $count = $this->runSql('DELETE FROM `surname` where labels_length <= 3;');
         $io->writeln(" > $count deletions\n");
 
         $io->writeln("Deleting surnames starting with a dash");
