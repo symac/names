@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Service\SlugGenerator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -44,10 +45,12 @@ class Result
     private $search;
 
     private $percentageDone;
+    private $slugGenerator;
 
-    public function __construct()
+    public function __construct(SlugGenerator $slugGenerator)
     {
         $this->status = Result::STATUS_NEW;
+        $this->slugGenerator = $slugGenerator;
         $this->resultSteps = new ArrayCollection();
     }
 
@@ -61,7 +64,7 @@ class Result
         return $this->slug;
     }
 
-    public function setSlug(string $slug): self
+    private function setSlug(string $slug): self
     {
         $this->slug = $slug;
 
@@ -158,7 +161,7 @@ class Result
     public function setSearch(string $search): self
     {
         $this->search = $search;
-
+        $this->setSlug($this->slugGenerator->clean($search));
         return $this;
     }
 

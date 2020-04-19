@@ -41,7 +41,12 @@
         <br/><div style="text-align: center;">- <a href="{{ url("about") }}">About</a> -</div>
     </footer>
 
-
+    <script type="text/javascript">
+        var ready = (callback) => {
+            if (document.readyState != "loading") callback();
+            else document.addEventListener("DOMContentLoaded", callback);
+        }
+    </script>
     {% block javascripts %}{% endblock %}
 </div>
 </body>

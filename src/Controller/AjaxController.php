@@ -34,8 +34,8 @@ class AjaxController extends AbstractController
         $slug = $slugGenerator->clean($name);
         $result = $resultRepository->findOneBy(["slug" => $slug]);
         if (!$result) {
-            $result = new Result();
-            $result->setSlug($slug);
+            $result = new Result($slugGenerator);
+            $result->setSearch($name);
             $em->persist($result);
         }
 
