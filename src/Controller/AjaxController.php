@@ -48,6 +48,15 @@ class AjaxController extends AbstractController
             $resultStep = new ResultStep();
             $start = microtime(true);
             $anagrams = $pseudonameFinder->search($slug, $forenameLengthNeeded);
+            foreach ($anagrams as $i => $anagram) {
+                if (strtoupper($anagram["s"]." ".$anagram["f"]) == strtoupper($name)) {
+                    unset($anagrams[$i]);
+                }
+            }
+            $anagrams = array_values($anagrams);
+
+            $result->setCountAnagrams($result->getCountAnagrams() + sizeof($anagrams));
+
             $resultStep->setDuration(microtime(true) - $start);
             $resultStep->setAnagrams($anagrams);
             $resultStep->setForenameLength($forenameLengthNeeded);

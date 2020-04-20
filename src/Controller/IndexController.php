@@ -14,6 +14,7 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\Date;
 
 class IndexController extends AbstractController
 {
@@ -31,6 +32,14 @@ class IndexController extends AbstractController
             $result = $resultRepository->findOneBy(["search" => $searchName]);
 
             if ((!is_null($result)) && ($result->getStatus() == Result::STATUS_FINISH)) {
+                $dt = new \DateTime();
+                # print "Compare #.$result->getViewDate()."# -- #".$dt
+                if ($result->getViewDate()->format("Y-m-d") != $dt->format("Y-m-d")) {
+                    $result->setViewDate(new \DateTime());
+                    $em->persist($result);
+                    $em->flush();
+                }
+
                 return $this->render('index/result.html.twig', [
                     'search_name' => $task["search_name"],
                     'result' => $result

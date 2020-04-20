@@ -6,6 +6,7 @@ use App\Service\SlugGenerator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints\Date;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ResultRepository")
@@ -47,11 +48,30 @@ class Result
     private $percentageDone;
     private $slugGenerator;
 
+
+    /**
+     * @ORM\Column(type="date", options={"default": "1970-01-01"})
+     */
+    private $createDate;
+
+    /**
+     * @ORM\Column(type="date", options={"default": "1970-01-01"})
+     */
+    private $viewDate;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $countAnagrams;
+
     public function __construct(SlugGenerator $slugGenerator)
     {
         $this->status = Result::STATUS_NEW;
         $this->slugGenerator = $slugGenerator;
         $this->resultSteps = new ArrayCollection();
+        $this->setCreateDate(new \DateTime());
+        $this->setViewDate(new \DateTime());
+        $this->setCountAnagrams(0);
     }
 
     public function getId(): ?int
@@ -134,15 +154,6 @@ class Result
         return $this->status === Result::STATUS_FINISH;
     }
 
-    public function countAnagrams()
-    {
-        $count = 0;
-        foreach ($this->getResultSteps() as $resultStep) {
-            $count += sizeof($resultStep->getAnagrams());
-        }
-        return $count;
-    }
-
     public function getSearch(): ?string
     {
         return $this->search;
@@ -197,4 +208,50 @@ class Result
         usort($output, function($a, $b) use ($c) { return $c->compare($a["s"]." ".$a["f"], $b["s"]." ".$b["f"]); });
         return $output;
     }
+
+    public function getCreateDate(): ?\DateTimeInterface
+    {
+        return $this->createDate;
+    }
+
+    public function setCreateDate(\DateTimeInterface $createDate): self
+    {
+        $this->createDate = $createDate;
+
+        return $this;
+    }
+
+    public function getViewDate(): ?\DateTimeInterface
+    {
+        return $this->viewDate;
+    }
+
+    public function setViewDate(\DateTimeInterface $viewDate): self
+    {
+        $this->viewDate = $viewDate;
+
+        return $this;
+    }
+
+    public function getCountAnagrams(): ?int
+    {
+        return $this->countAnagrams;
+    }
+
+    public function setCountAnagrams(int $countAnagrams): self
+    {
+        $this->countAnagrams = $countAnagrams;
+
+        return $this;
+    }
+
+    public function countAnagrams()
+    {
+        $count = 0;
+        foreach ($this->getResultSteps() as $resultStep) {
+            $count += sizeof($resultStep->getAnagrams());
+        }
+        return $count;
+    }
+
 }
