@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}APF{% endblock %}</title>
     {% block stylesheets %}{% endblock %}
+    <script type="text/javascript">
+        var ready = (callback) => {
+            if (document.readyState != "loading") callback();
+            else document.addEventListener("DOMContentLoaded", callback);
+        }
+    </script>
 </head>
 <body>
 <style>
@@ -40,13 +46,6 @@
         The only information being stored by this tool is the name you input above in order to provide a caching method in case you share the results of your anagram. All data provided as CC-0 by <a href="https://www.wikidata.org">Wikidata</a>. Results can be freely reused under the same license.
         <br/><div style="text-align: center;">- <a href="{{ url("about") }}">About</a> -</div>
     </footer>
-
-    <script type="text/javascript">
-        var ready = (callback) => {
-            if (document.readyState != "loading") callback();
-            else document.addEventListener("DOMContentLoaded", callback);
-        }
-    </script>
     {% block javascripts %}{% endblock %}
 </div>
 </body>

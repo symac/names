@@ -13,17 +13,42 @@
     font-size:1.5em;
     }
 
+    #quizz {
+    border:1px solid gray;
+    padding:1em;
+    clear:both;
+    }
 
+    #quizzImage, #quizzImageHidden {
+    float:right;
+    clear:both;
+    }
+
+    div#quizzImage {
+    font-size:7em;
+    padding-left:0.25em;
+    padding-right:0.25em;
+    margin-right: 0.25em;
+    }
+
+    #quizzAnswer {
+    visibility:hidden;
+    font-weight: bold;
+    color:purple;
+    }
 {% endblock %}
 
 {% block body %}
-    <p>Do you know the famous people behind these anagrams: <a href="http://apf.geobib.fr/anagrams-of-isaac-newton/436">Owen Castani</a>, <a href="http://apf.geobib.fr/anagrams-of-marilyn-monroe/442">Elionor Myrman</a> or <a href="http://apf.geobib.fr/anagrams-of-mickael-jackson/444">Aleksij Cockman</a>?.</p>
+    <h1>Find anagrams of your name</h1>
     <div style="text-align: center;">
-        <p><span style="font-size:2em">Find yours</span><br/>
-            <span style="font-size:2em">⬇</span>
+        <p>Works best when you enter a surname and a forename:</p>
         {{ form_start(form) }}
         {{ form_widget(form.search_name) }}
         {{ form_end(form) }}
-        </p>
     </div>
+
+    <h1>Quizz</h1>
+    {% include "quizz/embed.html.twig" %}
+    </div>
+
 {% endblock %}

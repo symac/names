@@ -14,7 +14,7 @@ class SearchType extends AbstractType
     {
         $builder
             ->add('search_name', TextType::class, ["label" => ""])
-            ->add("submit", SubmitType::class, ["label" => "Get anagrams for this full name"])
+            ->add("submit", SubmitType::class, ["label" => "Get anagrams"])
         ;
     }
 

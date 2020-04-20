@@ -19,13 +19,26 @@ class QuizzRepository extends ServiceEntityRepository
         parent::__construct($registry, Quizz::class);
     }
 
-    public function getRandom() {
+    public function findNeedAnagram() {
         $qb = $this->createQueryBuilder('q');
-        $countResults = $qb->select("COUNT(q)")->getQuery()->getSingleScalarResult();
+        $quizz = $qb->where("q.anagram is null")
+            ->setFirstResult(0)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+        return $quizz;
+    }
+
+    public function findRandom() {
+        $qb = $this->createQueryBuilder('q');
+        $countResults = $qb->select("COUNT(q)")
+            ->where("q.anagram is not null")
+            ->getQuery()->getSingleScalarResult();
 
         $offset = rand(0, $countResults - 1);
 
         $result = $qb->select("q")
+            ->where("q.anagram is not null")
             ->getQuery()
             ->setFirstResult($offset)
             ->setMaxResults(1)

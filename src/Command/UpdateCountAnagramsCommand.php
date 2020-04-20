@@ -46,7 +46,7 @@ class UpdateCountAnagramsCommand extends Command
         $results = $this->resultRepository->findAll();
         foreach ($results as $result) {
             print $result->getSlug()." : ".$result->getCountAnagrams()." => ";
-            $result->setCountAnagrams($result->computeCountAnagrams());
+            $result->setCountAnagrams($result->countAnagrams());
             print $result->getCountAnagrams()."\n";
             print "\n\n";
             $this->em->persist($result);

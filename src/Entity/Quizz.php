@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="App\Repository\QuizzRepository")
  */
-class Quizz
+class Quizz implements \JsonSerializable
 {
     /**
      * @ORM\Id()
@@ -27,7 +27,7 @@ class Quizz
     private $answer;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
     private $question;
 
@@ -50,6 +50,16 @@ class Quizz
      * @ORM\ManyToOne(targetEntity="App\Entity\Result")
      */
     private $Result;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $image;
+
+    /**
+     * @ORM\Column(type="string", length=512, nullable=true)
+     */
+    private $CommonsFilename;
 
     public function __construct()
     {
@@ -142,6 +152,44 @@ class Quizz
     public function setResult(?Result $Result): self
     {
         $this->Result = $Result;
+
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+    public function imageFilename(): string {
+        return $this->getSecret().$this->getId().".jpg";
+    }
+
+    public function jsonSerialize() {
+        return [
+            "wikidata" => $this->getWikidata(),
+            "question" => $this->getQuestion(),
+            "anagram" => $this->getAnagram(),
+            "answer" => $this->getAnswer(),
+            "image" => $this->getImage()
+        ];
+    }
+
+    public function getCommonsFilename(): ?string
+    {
+        return $this->CommonsFilename;
+    }
+
+    public function setCommonsFilename(string $CommonsFilename): self
+    {
+        $this->CommonsFilename = $CommonsFilename;
 
         return $this;
     }

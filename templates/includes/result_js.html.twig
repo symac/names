@@ -1,4 +1,15 @@
 <script type="text/javascript">
+    function filterResults(buttonId) {
+        buttonId = buttonId.replace("btnFilter", "");
+        for (i = 1; i <= 2; i++) {
+            if (i == parseInt(buttonId)) {
+                document.querySelectorAll(".gender" + i).forEach(a => a.style.display = "block");
+            } else {
+                document.querySelectorAll(".gender" + i).forEach(a => a.style.display = "none");
+            }
+        }
+    }
+
     function callJson() {
         fetch("{{ url("ajax_result", {'name': result.search}) }}")
             .then(function (response) {
@@ -11,7 +22,7 @@
                         if (json.status == 2) {
                             document.querySelector("#progressBar").style.display = "none";
                             {% if result.id %}
-                                document.querySelector("#numFound").innerHTML = totalNumFound + " anagrams found : <strong>finished ✔</strong> (<a href='{{ url('permalink', {name: result.searchSlugified, id: result.id}) }}'>sort alphabetically</a>)";
+                            document.querySelector("#numFound").innerHTML = json.totalCount + " anagrams found : <strong>finished ✔</strong> (<a href='{{ url('permalink', {name: result.searchSlugified, id: result.id}) }}'>sort alphabetically</a>)";
                             {% endif %}
                             document.querySelector("#share").style.display = "block";
                             document.querySelector("#filter").style.display = "block";
@@ -21,14 +32,12 @@
                                 let element = document.createElement("li");
                                 element.textContent = json.results[i]['s'] + " " + json.results[i]['f'];
                                 {% if quizz is defined %}
-                                element.innerHTML = json.results[i]['s'] + " " + json.results[i]['f'] + " : <a href='{{ url('quizz_add_second', {id: quizz.id, secret: quizz.secret})}}/" + json.results[i]['s'] + " " + json.results[i]['f'] + "'>choose</a>";
                                 {% endif %}
                                 element.className = "gender" + json.results[i]["g"];
                                 element.classList.add("gender");
                                 document.querySelector("#resultList").appendChild(element);
                             }
-                            totalNumFound += json.results.length;
-                            document.querySelector("#numFound").textContent = totalNumFound + " found";
+                            document.querySelector("#numFound").textContent = json.totalCount + " found";
                             callJson();
                         } else {
                             console.log("Autre statut");

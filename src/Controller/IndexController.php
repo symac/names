@@ -6,6 +6,7 @@ use App\Entity\Forename;
 use App\Entity\Result;
 use App\Entity\Surname;
 use App\Form\SearchType;
+use App\Repository\QuizzRepository;
 use App\Repository\ResultRepository;
 use App\Service\SlugGenerator;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,7 +22,7 @@ class IndexController extends AbstractController
     /**
      * @Route("/", name="home")
      */
-    public function index(Request $request, SlugGenerator $slugGenerator, ResultRepository $resultRepository, EntityManagerInterface $em)
+    public function index(Request $request, SlugGenerator $slugGenerator, ResultRepository $resultRepository, EntityManagerInterface $em, QuizzRepository $quizzRepository)
     {
         $form = $this->createForm(SearchType::class);
         $form->handleRequest($request);
@@ -57,9 +58,14 @@ class IndexController extends AbstractController
             ]);
 
         }
+
+        // Getting a quizz
+        $quizz = $quizzRepository->findRandom();
+        //$quizz = $quizzRepository->find(5);
         return $this->render('index/index.html.twig', [
             'controller_name' => 'IndexController',
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'quizz' => $quizz
         ]);
     }
 

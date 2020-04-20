@@ -18,7 +18,10 @@
 {% endblock %}
 
 {% block body %}
-    <h1>{{ quizz.anagram }}</h1>
+    <h1>{{ quizz.anagram }} - {{ quizz.id }}</h1>
+    {% if quizz.image %}
+        <img src="{{ asset('images/quizz/' ~ quizz.image) }}"/>
+    {% endif %}
     <p>
         {{ quizz.question }}
         <br/>
@@ -28,4 +31,5 @@
     <p id="answer">{{ quizz.answer }}</p>
     <hr/>
     <a href="{{ url('quizz_random') }}">See another one</a>
+    <a href="{{ url('quizz_add_01') }}">Add another one</a>
 {% endblock %}

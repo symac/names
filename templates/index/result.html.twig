@@ -23,19 +23,6 @@
     {% include "includes/result_js.html.twig" %}
 
     <script type="text/javascript">
-        var totalNumFound = 0;
-
-        function filterResults(buttonId) {
-            buttonId = buttonId.replace("btnFilter", "");
-            for (i = 1; i <= 2; i++) {
-                if (i == parseInt(buttonId)) {
-                    document.querySelectorAll(".gender" + i).forEach(a => a.style.display = "block");
-                } else {
-                    document.querySelectorAll(".gender" + i).forEach(a => a.style.display = "none");
-                }
-            }
-        }
-
         ready(() => {
             {% if not result.finished %}
            callJson();

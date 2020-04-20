@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello QuizzController!{% endblock %}
+
+{% block body %}
+    <h1>Select anagram for {{ quizz.answer }}</h1>
+    <p>{{ quizz.question }}</p>
+    <p><a style='color:red; font-weight: bold;' href="{{ url("quizz_delete", {id: quizz.id}) }}">REMOVE THIS ANAGRAM</a></p>
+
+    <div id="filter">
+        <p>Limit to :
+            <button class="btnFilter" id='btnFilter1'>Female, unisex & unknown</button>
+            <button class="btnFilter" id='btnFilter2'>Male, unisex & unknown</button>
+        </p>
+    </div>
+
+    <div>
+        {% if result.finished %}
+            <ul>
+            {% for anagram in result.sortedAnagrams %}
+                <li class="gender gender{{ anagram.g }}">{{ anagram.s }} {{ anagram.f }} &rarr; <a href="{{ url("quizz_set_anagram", {anagram : anagram.s ~ " " ~ anagram.f, secret: quizz.secret, id: quizz.id}) }}">choose this one</a></li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            {% include "includes/result_list.html.twig" %}
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/result.css') }}"/>
+{% endblock %}
+
+{% block javascripts %}
+    {% include "includes/result_js.html.twig" %}
+
+    <script type="text/javascript">
+        var totalNumFound = 0;
+
+        function filterResults(buttonId) {
+            buttonId = buttonId.replace("btnFilter", "");
+            for (i = 1; i <= 2; i++) {
+                if (i == parseInt(buttonId)) {
+                    document.querySelectorAll(".gender" + i).forEach(a => a.style.display = "block");
+                } else {
+                    document.querySelectorAll(".gender" + i).forEach(a => a.style.display = "none");
+                }
+            }
+        }
+
+        ready(() => {
+            {% if not result.finished %}
+            callJson();
+            {% endif %}
+            document.addEventListener('click', function (event) {
+                if ((event.target.id == "btnFilter0") || (event.target.id == "btnFilter1") || (event.target.id == "btnFilter2")) {
+                    filterResults(event.target.id);
+                }
+            }, false);
+
+        });
+    </script>
+{% endblock %}

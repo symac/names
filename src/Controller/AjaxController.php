@@ -4,12 +4,14 @@ namespace App\Controller;
 
 use App\Entity\Result;
 use App\Entity\ResultStep;
+use App\Repository\QuizzRepository;
 use App\Repository\ResultRepository;
 use App\Repository\ResultStepRepository;
 use App\Service\PseudonameFinder;
 use App\Service\SlugGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 class AjaxController extends AbstractController
@@ -68,8 +70,18 @@ class AjaxController extends AbstractController
         }
         $output["percent"] = $result->getPercentageDone();
         $output["status"] = $result->getStatus();
+        $output["totalCount"] = $result->getCountAnagrams();
         $em->persist($result);
         $em->flush();
         return $this->json($output);
+    }
+
+    /**
+     * @Route("/ajax/quizz", name="ajax_random_quizz")
+    */
+    public function quizz(QuizzRepository $quizzRepository) {
+        $quizz = $quizzRepository->findRandom();
+        return new JsonResponse($quizz);
+        dd($quizz);
     }
 }
