@@ -24,8 +24,8 @@
 
     <script type="text/javascript">
         ready(() => {
-            {% if not result.finished %}
-           callJson();
+            {% if not result.finished and result.slug != "" %}
+            callJson();
             {% endif %}
             document.addEventListener('click', function (event) {
                 if ((event.target.id == "btnFilter0") || (event.target.id == "btnFilter1") || (event.target.id == "btnFilter2")) {
@@ -61,6 +61,8 @@
                 {% endfor %}
             </ul>
         </div>
+    {% elseif result.slug == "" %}
+        <p style="border:1px solid red; padding:1em;">It seems the name you entered is either too short either doesn't contain any character that we have been able to convert to latin-1 characters. At the moment our algorithm is not able to cope with them, we are sorry.<br/><br/>Please <a href="{{ url("home") }}">try again with another name</a>!</p>
     {% else %}
         <div id="loader">Loading...</div>
         <p id="numFound"></p>
