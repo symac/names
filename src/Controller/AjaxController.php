@@ -33,8 +33,7 @@ class AjaxController extends AbstractController
     {
         $output = [];
 
-        $slug = $slugGenerator->clean($name);
-        $result = $resultRepository->findOneBy(["slug" => $slug]);
+        $result = $resultRepository->findOneBy(["search" => $name]);
         if (!$result) {
             $result = new Result($slugGenerator);
             $result->setSearch($name);
@@ -49,7 +48,7 @@ class AjaxController extends AbstractController
             $result->setStatus(Result::STATUS_RUNNING);
             $resultStep = new ResultStep();
             $start = microtime(true);
-            $anagrams = $pseudonameFinder->search($slug, $forenameLengthNeeded);
+            $anagrams = $pseudonameFinder->search($result->getSlug(), $forenameLengthNeeded);
             foreach ($anagrams as $i => $anagram) {
                 if (strtoupper($anagram["s"]." ".$anagram["f"]) == strtoupper($name)) {
                     unset($anagrams[$i]);
@@ -71,6 +70,7 @@ class AjaxController extends AbstractController
         $output["percent"] = $result->getPercentageDone();
         $output["status"] = $result->getStatus();
         $output["totalCount"] = $result->getCountAnagrams();
+
         $em->persist($result);
         $em->flush();
         return $this->json($output);
