@@ -61,7 +61,6 @@ class IndexController extends AbstractController
 
         // Getting a quizz
         $quizz = $quizzRepository->findRandom();
-        //$quizz = $quizzRepository->find(5);
         return $this->render('index/index.html.twig', [
             'controller_name' => 'IndexController',
             'form' => $form->createView(),

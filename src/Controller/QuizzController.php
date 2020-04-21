@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Quizz;
+use App\Entity\QuizzCategory;
 use App\Entity\Result;
 use App\Form\QuizzType;
 use App\Repository\QuizzRepository;
@@ -144,9 +145,12 @@ class QuizzController extends AbstractController
     /**
      * @Route("/quizz/random", name="quizz_random")
      */
-    public function random(QuizzRepository $quizzRepository)
+    public function random(QuizzRepository $quizzRepository, EntityManagerInterface $em)
     {
-        $quizz = $quizzRepository->getRandom();
+        $quizz = $quizzRepository->findRandom();
+        $quizz->setViews($quizz->getViews() + 1);
+        $em->persist($quizz);
+        $em->flush();
         return $this->redirect(
             $this->generateUrl("quizz_view", ["id" => $quizz->getId(), "secret" => $quizz->getSecret()])
         );
@@ -162,8 +166,8 @@ class QuizzController extends AbstractController
             $em->persist($quizz);
             $em->flush();
         }
-        $quizz = $quizzRepository->findNeedAnagram();
 
+        $quizz = $quizzRepository->findNeedAnagram();
         $result = $resultRepository->findOneBy(["search" => $quizz->getAnswer()]);
         if (is_null($result)) {
             $result = new Result($slugGenerator);
@@ -183,7 +187,9 @@ class QuizzController extends AbstractController
      * @Route("quizz/delete/{id}", name="quizz_delete")
      */
     public function delete(Quizz $quizz, EntityManagerInterface $em) {
-        $em->remove($quizz);
+
+        $quizz->setVisible(false);
+        $em->persist($quizz);
         $em->flush();
         return $this->redirect(
           $this->generateUrl("quizz_set_anagram")

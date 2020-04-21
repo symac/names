@@ -5,40 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <title>{% block title %}APF{% endblock %}</title>
-    {% block stylesheets %}{% endblock %}
-    <script type="text/javascript">
-        var ready = (callback) => {
-            if (document.readyState != "loading") callback();
-            else document.addEventListener("DOMContentLoaded", callback);
-        }
-    </script>
+    {% include "includes/base_css.html.twig" %}
 </head>
 <body>
-<style>
-    body {
-        max-width: 1024px;
-        margin: 40px auto;
-        color: #444;
-        padding: 0 10px
-    }
-
-    footer {
-        border-top: 1px solid #CCC;
-        font-size: 0.9em;
-        color: #444;
-        font-style: italic;
-        text-align: justify;
-        padding-top: 1em;
-    }
-
-
-    h1, h2, h3 {
-        line-height: 1.2
-    }
-
-    {% block css %}{% endblock %}
-</style>
-
 <div id="container">
     <h1><a href="{{ url("home") }}">APF - Anagram Pseudo Finder</a></h1>
 
@@ -47,7 +16,9 @@
         The only information being stored by this tool is the name you input above in order to provide a caching method in case you share the results of your anagram. All data provided as CC-0 by <a href="https://www.wikidata.org">Wikidata</a>. Results can be freely reused under the same license.
         <br/><div style="text-align: center;">- <a href="{{ url("about") }}">About</a> -</div>
     </footer>
-    {% block javascripts %}{% endblock %}
 </div>
+{% include "includes/base_js.html.twig" %}
+{% block javascripts %}{% endblock %}
+
 </body>
 </html>

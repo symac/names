@@ -46,27 +46,17 @@ class AjaxController extends AbstractController
             $result->setPercentageDone(100);
         } else {
             $result->setStatus(Result::STATUS_RUNNING);
-            $resultStep = new ResultStep();
             $start = microtime(true);
             $anagrams = $pseudonameFinder->search($result->getSlug(), $forenameLengthNeeded);
-            foreach ($anagrams as $i => $anagram) {
-                if (strtoupper($anagram["s"]." ".$anagram["f"]) == strtoupper($name)) {
-                    unset($anagrams[$i]);
-                }
-            }
-            $anagrams = array_values($anagrams);
-
-            $result->setCountAnagrams($result->getCountAnagrams() + sizeof($anagrams));
-
-            $resultStep->setDuration(microtime(true) - $start);
-            $resultStep->setAnagrams($anagrams);
-            $resultStep->setForenameLength($forenameLengthNeeded);
-            $resultStep->setResult($result);
+            $duration = microtime(true) - $start;
+            $resultStep = $result->addAnagrams($anagrams, $forenameLengthNeeded, $duration);
             $em->persist($resultStep);
+            $em->persist($result);
             $em->flush();
-            $output["results"] = $resultStep->getAnagrams();
-            $output["duration"] = $resultStep->getDuration();
+            $output["results"] = $anagrams;
+            $output["duration"] = $duration;
         }
+
         $output["percent"] = $result->getPercentageDone();
         $output["status"] = $result->getStatus();
         $output["totalCount"] = $result->getCountAnagrams();

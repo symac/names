@@ -5,6 +5,7 @@
 {% block body %}
     <h1>Select anagram for {{ quizz.answer }}</h1>
     <p>{{ quizz.question }}</p>
+    <p>Category : <strong>{{ quizz.quizzCategory }}</strong></p>
     <p><a style='color:red; font-weight: bold;' href="{{ url("quizz_delete", {id: quizz.id}) }}">REMOVE THIS ANAGRAM</a></p>
 
     <div id="filter">

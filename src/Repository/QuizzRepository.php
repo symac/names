@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Quizz;
+use App\Entity\QuizzCategory;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,9 +20,15 @@ class QuizzRepository extends ServiceEntityRepository
         parent::__construct($registry, Quizz::class);
     }
 
-    public function findNeedAnagram() {
+    public function findNeedAnagram(QuizzCategory $quizzCategory = null) {
         $qb = $this->createQueryBuilder('q');
-        $quizz = $qb->where("q.anagram is null")
+        if (!is_null($quizzCategory)) {
+            $quizz = $qb->where("q.anagram is null and q.visible = 1 and q.quizzCategory = :quizzCategory");
+            $quizz->setParameter("quizzCategory", $quizzCategory);
+        } else {
+            $quizz = $qb->where("q.anagram is null and q.visible = 1");
+        }
+        $quizz = $quizz
             ->setFirstResult(0)
             ->setMaxResults(1)
             ->getQuery()
@@ -32,13 +39,16 @@ class QuizzRepository extends ServiceEntityRepository
     public function findRandom() {
         $qb = $this->createQueryBuilder('q');
         $countResults = $qb->select("COUNT(q)")
-            ->where("q.anagram is not null")
+            ->where("q.anagram is not null and q.visible = 1")
             ->getQuery()->getSingleScalarResult();
 
         $offset = rand(0, $countResults - 1);
+        if ($offset == 0) {
+            return null;
+        }
 
         $result = $qb->select("q")
-            ->where("q.anagram is not null")
+            ->where("q.anagram is not null and q.visible = 1")
             ->getQuery()
             ->setFirstResult($offset)
             ->setMaxResults(1)

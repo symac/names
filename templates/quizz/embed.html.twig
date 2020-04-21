@@ -1,37 +1,25 @@
-<script type="text/javascript">
-    ready(() => {
-        document.addEventListener('click', function (event) {
-            if (event.target.id == "quizzShowAnswer") {
-                let imageHidden = document.querySelector("#quizzImageHidden");
-                if (imageHidden) {
-                    imageHidden.style.display = "block";
-                    document.querySelector("#quizzImage").style.display = "none";
-                } else {
-                    document.querySelector("#quizzImage").textContent = "→";
-                }
+{% if quizz is not null %}
+    <div id="quizz">
 
-                document.querySelector("#quizzShowAnswer").style.display="none";
-                document.querySelector("#quizzAnswer").style.visibility="visible";
+        {% if quizz.image %}
+            <div id="quizzImageHidden" style="display: none; text-align: center">
+                <img id="" style="height: 8em; margin-right: 1em;"  src="{{ asset('images/quizz/' ~ quizz.image)}}"/>
+                <div><a href="https://commons.wikimedia.org/wiki/File:{{ quizz.commonsFilename }}">&#127279; License on Wikimedia commons</a></div>
+            </div>
+        {% endif %}
+        <div id="quizzImage">?</div>
 
-                return false;
-            }
-        }, false);
-    });
-</script>
-<div id="quizz">
-    {% if quizz.image %}
-        <div id="quizzImageHidden" style="display: none; text-align: center">
-            <img id="" style="height: 8em; margin-right: 1em;"  src="{{ asset('images/quizz/' ~ quizz.image)}}"/>
-            <div><a href="https://commons.wikimedia.org/wiki/File:{{ quizz.commonsFilename }}">&#127279; License on Wikimedia commons</a></div>
+        <div id="quizzQuestion">
+            <p>[Category : {{ quizz.quizzCategory.name }}]</p>
+            <h2>My anagram is {{ quizz.anagram }}</h2>
+            <p>{{ quizz.question }}</p>
+            <h2>I am: <a id='quizzShowAnswer' href="#">show the answer</a><span id="quizzAnswer">{{ quizz.answer }}</span> </h2>
+            <hr/>
+            {% if pageName == "home" %}
+                <p><a href="{{ url("quizz_random") }}">show more quizzes</a></p>
+            {% elseif pageName == "random" %}
+                <p><a href="{{ url("quizz_random") }}">show another one</a></p>
+            {% endif %}
         </div>
-    {% endif %}
-    <div id="quizzImage">?</div>
-
-    <div id="quizzQuestion">
-        <h2>My anagram is {{ quizz.anagram }}</h2>
-        <p>{{ quizz.question }}</p>
-        <h2>I am: <a id='quizzShowAnswer' href="#">show the answer</a><span id="quizzAnswer">{{ quizz.answer }}</span> </h2>
-        <hr/>
-        <p><a href="{{ url("home") }}">show another one</a></p>
     </div>
-</div>
+{% endif %}

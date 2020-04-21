@@ -254,4 +254,25 @@ class Result
         return $count;
     }
 
+    public function addAnagrams(array $anagrams, int $forenameLength, float $duration)
+    {
+        // Remove the current name
+        foreach ($anagrams as $i => $anagram) {
+            if (strtoupper($anagram["s"]." ".$anagram["f"]) == strtoupper($this->getSearch())) {
+                unset($anagrams[$i]);
+            }
+        }
+        $anagrams = array_values($anagrams);
+
+        $resultStep = new ResultStep();
+        $resultStep->setDuration($duration);
+        $resultStep->setAnagrams($anagrams);
+        $resultStep->setForenameLength($forenameLength);
+
+        $this->setCountAnagrams($this->getCountAnagrams() + sizeof($anagrams));
+        $this->addResultStep($resultStep);
+
+        return $resultStep;
+    }
+
 }

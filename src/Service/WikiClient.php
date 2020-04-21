@@ -59,6 +59,10 @@ class WikiClient
         return null;
     }
 
+    public function cleanQ($wikidata) {
+        return preg_replace("#https?://www.wikidata.org/entity/#", "", $wikidata);
+    }
+
     public function getThumbnailUrl($json, $Q) {
         $originalFilename = $this->extractImageName($json, $Q);
         if (!is_null($originalFilename)) {

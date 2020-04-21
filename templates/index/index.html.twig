@@ -2,42 +2,6 @@
 
 {% block title %}APF - Anagram Pseudo Finder{% endblock %}
 
-{% block css %}
-    input {
-    height:2em;
-    width:60%;
-    }
-
-    button {
-    display: inline-block;
-    font-size:1.5em;
-    }
-
-    #quizz {
-    border:1px solid gray;
-    padding:1em;
-    clear:both;
-    }
-
-    #quizzImage, #quizzImageHidden {
-    float:right;
-    clear:both;
-    }
-
-    div#quizzImage {
-    font-size:7em;
-    padding-left:0.25em;
-    padding-right:0.25em;
-    margin-right: 0.25em;
-    }
-
-    #quizzAnswer {
-    visibility:hidden;
-    font-weight: bold;
-    color:purple;
-    }
-{% endblock %}
-
 {% block body %}
     <h1>Find anagrams of your name</h1>
     <div style="text-align: center;">
@@ -48,7 +12,7 @@
     </div>
 
     <h1>Quizz</h1>
-    {% include "quizz/embed.html.twig" %}
+    {% include "quizz/embed.html.twig" with {pageName: "home"} %}
     </div>
 
 {% endblock %}

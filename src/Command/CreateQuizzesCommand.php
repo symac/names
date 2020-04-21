@@ -3,13 +3,20 @@
 namespace App\Command;
 
 use App\Entity\Quizz;
+use App\Entity\QuizzCategory;
+use App\Entity\Result;
+use App\Repository\ResultRepository;
+use App\Service\PseudonameFinder;
+use App\Service\SlugGenerator;
 use App\Service\WikiClient;
+use BorderCloud\SPARQL\SparqlClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class CreateQuizzesCommand extends Command
@@ -18,11 +25,15 @@ class CreateQuizzesCommand extends Command
 
     private $wikiClient;
     private $em;
+    private $pseudonameFinder;
+    private $slugGenerator;
 
-    public function __construct(string $name = null, WikiClient $wikiClient, EntityManagerInterface $em)
+    public function __construct(string $name = null, WikiClient $wikiClient, EntityManagerInterface $em, PseudonameFinder $pseudonameFinder, SlugGenerator $slugGenerator)
     {
         $this->wikiClient = $wikiClient;
         $this->em = $em;
+        $this->pseudonameFinder = $pseudonameFinder;
+        $this->slugGenerator = $slugGenerator;
 
         parent::__construct($name);
     }
@@ -30,52 +41,104 @@ class CreateQuizzesCommand extends Command
     protected function configure()
     {
         $this
-            ->setDescription('Create quizzes for a list of Q')
-        ;
+            ->setDescription('Create quizzes for a list of Q');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        $Q = ["Q9960", "Q2831", "Q882", "Q4617", "Q5577", "Q5284", "Q303", "Q4612", "Q1203", "Q1744", "Q78516", "Q5608", "Q392", "Q34086", "Q23530", "Q8877", "Q7742", "Q83338", "Q1779", "Q13909", "Q1362169", "Q7546", "Q12897", "Q2685", "Q5105", "Q16397", "Q32927", "Q35332", "Q30449", "Q2599", "Q11637", "Q1631", "Q83287", "Q205707", "Q36844", "Q34424", "Q44301", "Q82110", "Q1276", "Q38111", "Q4573", "Q39829", "Q34389", "Q42786", "Q12881", "Q5383", "Q10520", "Q503706", "Q44461", "Q43203", "Q36949", "Q37001", "Q317521", "Q2263", "Q37459", "Q23844", "Q40912", "Q6107", "Q39792", "Q40096", "Q23543", "Q38222", "Q19794", "Q23359", "Q26876", "Q40504", "Q40523", "Q41173", "Q41594", "Q873", "Q37876", "Q23880", "Q129817", "Q43252", "Q102124", "Q3772", "Q188500", "Q83158", "Q32522", "Q42493", "Q55800", "Q284636", "Q40791", "Q42775", "Q2643", "Q2757", "Q48337", "Q159577", "Q80966", "Q2680", "Q132964", "Q80938", "Q512", "Q42574", "Q43247", "Q43416", "Q56016", "Q3099714", "Q40531", "Q40572"];
+        $quizzCategories = $this->em->getRepository(QuizzCategory::class)->findAll();
+        $helper = $this->getHelper('question');
 
-        foreach ($Q as $oneQ) {
-            $quizz = $this->em->getRepository(Quizz::class)->findOneBy(["wikidata" => $oneQ
+        $question = new ChoiceQuestion(
+            'Please select your favorite color (defaults to red)',
+            $quizzCategories,
+            0
+        );
+        $categoryName = $helper->ask($input, $output, $question);
+
+        $quizzCategory = $this->em->getRepository(QuizzCategory::class)->findOneBy(["name" => $categoryName]);
+
+        $client = new SparqlClient();
+        $client->setEndpointRead("https://query.wikidata.org/sparql");
+
+        #Personnes décédées en 2018 classées par nombre de liens de sites
+        $q = "select ?person ?sitelinks where {
+        ?person wdt:P31 wd:Q5 .
+        ?person wdt:P106 wd:" . $quizzCategory->getWikidataOccupation() . " .
+        ?person wikibase:sitelinks ?sitelinks.
+        } order by desc(?sitelinks) limit 100";
+        //
+
+        $rows = $client->query($q, 'rows');
+        $err = $client->getErrors();
+        if ($err) {
+            print_r($err);
+            throw new Exception(print_r($err, true));
+        }
+
+        foreach ($rows["result"]["rows"] as $row) {
+            $wikidata = $this->wikiClient->cleanQ($row["person"]);
+
+            $quizz = $this->em->getRepository(Quizz::class)->findOneBy(["wikidata" => $wikidata, "quizzCategory" => $quizzCategory
             ]);
 
             if (!is_null($quizz)) {
-                print $oneQ."\n";
-                $informations = $this->wikiClient->getWikidataJson($oneQ);
-                $commonsImageName = $this->wikiClient->extractImageName($informations, $oneQ);
-                $quizz->setCommonsFilename($commonsImageName);
-
-                $this->em->persist($quizz);
-                $this->em->flush();
+                $io->writeln("<error>Quizz already exists</error>");
             } else {
-                $quizz = new Quizz();
-                $quizz->setWikidata($oneQ);
-                $this->em->persist($quizz);
-                $this->em->flush();
+                $informations = $this->wikiClient->getWikidataJson($wikidata);
+                $label = $this->wikiClient->extractLabel($informations, $wikidata);
 
-                $informations = $this->wikiClient->getWikidataJson($oneQ);
-                $label = $this->wikiClient->extractLabel($informations, $oneQ);
-                $quizz->setAnswer($label);
+                if (strlen($label) < 10) {
+                    $io->writeln("<error>Label is too short</error>");
+                } else {
+                    $quizz = new Quizz();
+                    $quizz->setQuizzCategory($quizzCategory);
+                    $quizz->setWikidata($wikidata);
+                    $io->title("$label (".$row["sitelinks"].")");
 
-                $description = $this->wikiClient->extractDescription($informations, $oneQ);
-                $quizz->setQuestion($description);
+                    $io->writeln("<info>Building results</info>");
+                    $result = new Result($this->slugGenerator);
+                    $result->setSearch($label);
+                    $count = 0;
+                    for ($i = 4; $i <= strlen($label) - 4; $i++) {
+                        $start = microtime(true);
+                        $anagrams = $this->pseudonameFinder->search($result->getSlug(), $i);
+                        $duration = microtime(true) - $start;
+                        $resultStep = $result->addAnagrams($anagrams, $i, $duration);
+                        $this->em->persist($resultStep);
+                        $io->writeln("Search for $i => ".sizeof($resultStep->getAnagrams()));
+                        $count += sizeof($resultStep->getAnagrams());
+                    }
+                    $io->writeln("$count anagrams found\n\n");
+                    $result->setStatus(Result::STATUS_FINISH);
+                    $this->em->persist($result);
 
-                $localImageName = $this->wikiClient->getThumbnailUrl($informations, $oneQ);
-                $quizz->setImage($localImageName);
-                $io->writeln($oneQ);
+                    $io->writeln("<info>Set answer</info>");
+                    $quizz->setAnswer($label);
+                    $description = $this->wikiClient->extractDescription($informations, $wikidata);
+                    $quizz->setQuestion($description);
 
-                $this->em->persist($quizz);
-                $this->em->flush();
+                    $io->writeln("<info>Downloading image</info>");
+                    $commonsImageName = $this->wikiClient->extractImageName($informations, $wikidata);
+                    if (!is_null($commonsImageName)) {
+                        $quizz->setCommonsFilename($commonsImageName);
+                    }
+
+                    try {
+                        $localImageName = $this->wikiClient->getThumbnailUrl($informations, $wikidata);
+                        $quizz->setImage($localImageName);
+                    } catch (\Exception $e) {
+                        $io->writeln("<error>Error download</error>");
+                    }
+
+                    $this->em->persist($quizz);
+                    $this->em->flush();
+                }
             }
 
-
         }
-
         $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
 
         return 0;

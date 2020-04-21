@@ -61,6 +61,21 @@ class Quizz implements \JsonSerializable
      */
     private $CommonsFilename;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\QuizzCategory", inversedBy="Quizzes")
+     */
+    private $quizzCategory;
+
+    /**
+     * @ORM\Column(type="boolean", options={"default": true})
+     */
+    private $visible;
+
+    /**
+     * @ORM\Column(type="integer", options={"default": 0})
+     */
+    private $views;
+
     public function __construct()
     {
         $this->creationDate = new \DateTime();
@@ -190,6 +205,42 @@ class Quizz implements \JsonSerializable
     public function setCommonsFilename(string $CommonsFilename): self
     {
         $this->CommonsFilename = $CommonsFilename;
+
+        return $this;
+    }
+
+    public function getQuizzCategory(): ?QuizzCategory
+    {
+        return $this->quizzCategory;
+    }
+
+    public function setQuizzCategory(?QuizzCategory $quizzCategory): self
+    {
+        $this->quizzCategory = $quizzCategory;
+
+        return $this;
+    }
+
+    public function getVisible(): ?bool
+    {
+        return $this->visible;
+    }
+
+    public function setVisible(bool $visible): self
+    {
+        $this->visible = $visible;
+
+        return $this;
+    }
+
+    public function getViews(): ?int
+    {
+        return $this->views;
+    }
+
+    public function setViews(int $views): self
+    {
+        $this->views = $views;
 
         return $this;
     }
