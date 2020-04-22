@@ -3,11 +3,15 @@
 {% block title %}APF - Anagram Pseudo Finder{% endblock %}
 
 {% block body %}
-    <h1>Find anagrams of your name</h1>
+    <h1>Find anagrams of any name</h1>
     <div style="text-align: center;">
-        <p>Works best when you enter a surname and a forename:</p>
         {{ form_start(form) }}
-        {{ form_widget(form.search_name) }}
+        <label>
+            Works best when you enter a surname and a forename:
+        {{ form_widget(form.search_name, {'id': "home_search"}) }}
+        </label>
+        <br/>
+        <input type="submit" value="Get anagrams" id="homeSubmit"/>
         {{ form_end(form) }}
     </div>
 

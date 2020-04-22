@@ -43,7 +43,8 @@ class IndexController extends AbstractController
 
                 return $this->render('index/result.html.twig', [
                     'search_name' => $task["search_name"],
-                    'result' => $result
+                    'result' => $result,
+                    'form' => $form->createView()
                 ]);
             }
 
@@ -54,7 +55,8 @@ class IndexController extends AbstractController
                 $em->flush();
             }
             return $this->render('index/result.html.twig', [
-                'result' => $result
+                'result' => $result,
+                'form' => $form->createView()
             ]);
 
         }
@@ -73,11 +75,14 @@ class IndexController extends AbstractController
      */
     public function permalink(Result $result, string $name)
     {
+        $form = $this->createForm(SearchType::class);
+
         if ($result->getSearchSlugified() != $name) {
             throw $this->createNotFoundException('The product does not exist');
         }
         return $this->render('index/result.html.twig', [
-            'result' => $result
+            'result' => $result,
+            'form' => $form->createView()
         ]);
     }
 
@@ -86,13 +91,15 @@ class IndexController extends AbstractController
      */
     public function about(EntityManagerInterface $em)
     {
+        $form = $this->createForm(SearchType::class);
         $countForenames = $em->getRepository(Forename::class)->createQueryBuilder('a')->select('count(a.id)')->getQuery()->getSingleScalarResult();
         $countSurnames = $em->getRepository(Surname::class)->createQueryBuilder('a')->select('count(a.id)')->getQuery()->getSingleScalarResult();
         $countAnagrams = $em->getRepository(Result::class)->createQueryBuilder('a')->select('count(a.id)')->getQuery()->getSingleScalarResult();
         return $this->render('index/about.html.twig', [
             "countSurnames" => $countSurnames,
             "countForenames" => $countForenames,
-            "countAnagrams" => $countAnagrams
+            "countAnagrams" => $countAnagrams,
+            "form" => $form->createView()
         ]);
     }
 }

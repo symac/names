@@ -39,10 +39,11 @@
 
 {% block body %}
     {% if result.finished %}
-        <h2>{{ result.countAnagrams }} anagrams found for : {{ result.search }}</h2>
+        <h1><span class="strong">{{ result.search }}</span> has {{ result.countAnagrams }} anagrams</h1>
     {% else %}
-        <h2>Search anagrams for : {{ result.search }}</h2>
+        <h1><span class="strong">{{ result.search }}</span> has <span id="numFound">0</span> anagrams <span id="sofar">so far</span></h1>
     {% endif %}
+    </h1>
     <div id="share">Share this result : <a
                 href="{{ url("permalink", {name: result.searchSlugified, id: result.id}) }}">{{ url("permalink", {name: result.searchSlugified, id: result.id}) }}</a>
     </div>
@@ -64,7 +65,7 @@
         <p style="border:1px solid red; padding:1em;">It seems the name you entered is either too short either doesn't contain any character that we have been able to convert to latin-1 characters. At the moment our algorithm is not able to cope with them, we are sorry.<br/><br/>Please <a href="{{ url("home") }}">try again with another name</a>!</p>
     {% else %}
         <div id="loader">Loading...</div>
-        <p id="numFound"></p>
+
         <div id="progressBar">
             <div id="barStatus"></div>
         </div>

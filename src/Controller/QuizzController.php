@@ -6,6 +6,7 @@ use App\Entity\Quizz;
 use App\Entity\QuizzCategory;
 use App\Entity\Result;
 use App\Form\QuizzType;
+use App\Form\SearchType;
 use App\Repository\QuizzRepository;
 use App\Repository\ResultRepository;
 use App\Service\SlugGenerator;
@@ -133,12 +134,14 @@ class QuizzController extends AbstractController
      */
     public function view(Quizz $quizz, string $secret)
     {
+        $form = $this->createForm(SearchType::class);
         if ($quizz->getSecret() != $secret) {
             return new  Response("There is an issue with the url, please return to <a href='" . $this->generateUrl("home") . "'>homepage</a>");
         }
 
         return $this->render("quizz/view.html.twig", [
-            "quizz" => $quizz
+            "quizz" => $quizz,
+            "form" => $form->createView()
         ]);
     }
 

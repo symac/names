@@ -9,6 +9,13 @@
             }
         }
     }
+    function sortList(ul) {
+        var ul = document.getElementById(ul);
+
+        Array.from(ul.getElementsByTagName("LI"))
+            .sort((a, b) => a.textContent.localeCompare(b.textContent))
+            .forEach(li => ul.appendChild(li));
+    }
 
     function callJson() {
         fetch("{{ url("ajax_result", {'name': result.search}) }}")
@@ -22,11 +29,13 @@
                         if (json.status == 2) {
                             document.querySelector("#progressBar").style.display = "none";
                             {% if result.id %}
-                            document.querySelector("#numFound").innerHTML = json.totalCount + " anagrams found : <strong>finished ✔</strong> (<a href='{{ url('permalink', {name: result.searchSlugified, id: result.id}) }}'>sort alphabetically</a>)";
+                            document.querySelector("#numFound").textContent = json.totalCount;
                             {% endif %}
                             document.querySelector("#share").style.display = "block";
                             document.querySelector("#filter").style.display = "block";
                             document.querySelector("#loader").style.display = "none";
+                            document.querySelector("#sofar").innerHTML = "&#10003;";
+                            sortList("resultList");
                         } else if (json.status == 1) {
                             for (let i = 0; i < json.results.length; i++) {
                                 let element = document.createElement("li");
@@ -37,7 +46,7 @@
                                 element.classList.add("gender");
                                 document.querySelector("#resultList").appendChild(element);
                             }
-                            document.querySelector("#numFound").textContent = json.totalCount + " found";
+                            document.querySelector("#numFound").textContent = json.totalCount;
                             callJson();
                         } else {
                             console.log("Autre statut");

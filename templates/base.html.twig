@@ -1,20 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Transform your name in an anagram that looks like a real name !">
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <title>{% block title %}APF{% endblock %}</title>
     {% include "includes/base_css.html.twig" %}
 </head>
+{% set current_path = app.request.get('_route') %}
 <body>
-<div id="container">
-    <h1><a href="{{ url("home") }}">APF - Anagram Pseudo Finder</a></h1>
+<div class="header">
+    <a href="{{ url("home") }}" class="logo">Anagram Pseudo Finder</a>
+    {% if current_path != "home" or result is defined %}
+        <div class="header-right">
+            {{ form_start(form, {'action': path('home')}) }}
+            <label>
+                Search anagrams for:
+                {{ form_widget(form.search_name) }}
+                <input type="submit" value="go"/>
+            </label>
+            {{ form_end(form) }}
+            </form>
+        </div>
+    {% endif %}
+</div>
 
+<div id="container">
     {% block body %}{% endblock %}
     <footer>
-        The only information being stored by this tool is the name you input above in order to provide a caching method in case you share the results of your anagram. All data provided as CC-0 by <a href="https://www.wikidata.org">Wikidata</a>. Results can be freely reused under the same license.
-        <br/><div style="text-align: center;">- <a href="{{ url("about") }}">About</a> -</div>
+        All data provided as CC-0 by <a href="https://www.wikidata.org">Wikidata</a>.
+        Results can be freely reused under the same license. No information is stored except the names searched, for caching purpose.
+        <br/>
+        <div style="margin-top: 1em;">- <a href="{{ url("about") }}">About</a> -</div>
     </footer>
 </div>
 {% include "includes/base_js.html.twig" %}
