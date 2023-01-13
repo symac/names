@@ -23,11 +23,11 @@ class PopulateSurnamesCommand extends Command
     protected $slugGenerator;
     private $em;
 
-    public function __construct(string $name = null, SlugGenerator $slugGenerator, EntityManagerInterface $em)
+    public function __construct(SlugGenerator $slugGenerator, EntityManagerInterface $em)
     {
         $this->slugGenerator = $slugGenerator;
         $this->em = $em;
-        parent::__construct($name);
+        parent::__construct();
     }
     protected function configure()
     {

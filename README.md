@@ -6,7 +6,7 @@ To populate the database, one has to run queries against SPARQL endpoint, downlo
 
 The commands that have to be run are : 
 
-- ``` symfony console app:populate-forenames```
+- ``` symfony console app:populate-forename```
 - ``` symfony console app:get-genders```
-- ``` symfony console app:populate-surnames```
+- ``` symfony console app:populate-surname```
 - ``` symfony console app:clean-db```

@@ -24,11 +24,11 @@ class UpdateCountAnagramsCommand extends Command
     private $em;
     private $resultRepository;
 
-    public function __construct(string $name = null, EntityManagerInterface $em, ResultRepository $resultRepository)
+    public function __construct(EntityManagerInterface $em, ResultRepository $resultRepository)
     {
         $this->em = $em;
         $this->resultRepository = $resultRepository;
-        parent::__construct($name);
+        parent::__construct();
 
     }
 

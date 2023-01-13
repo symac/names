@@ -22,10 +22,10 @@ class CleanDatabaseCommand extends Command
 
     private $em;
 
-    public function __construct(string $name = null, EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
-        parent::__construct($name);
+        parent::__construct();
     }
 
     protected function configure()

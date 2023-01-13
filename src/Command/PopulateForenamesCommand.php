@@ -25,12 +25,12 @@ class PopulateForenamesCommand extends Command
     private $em;
     private $forenameRepository;
 
-    public function __construct(string $name = null, SlugGenerator $slugGenerator, EntityManagerInterface $em, ForenameRepository $forenameRepository)
+    public function __construct(SlugGenerator $slugGenerator, EntityManagerInterface $em, ForenameRepository $forenameRepository)
     {
         $this->slugGenerator = $slugGenerator;
         $this->em = $em;
         $this->forenameRepository = $forenameRepository;
-        parent::__construct($name);
+        parent::__construct();
     }
 
     protected function configure()
@@ -43,7 +43,7 @@ class PopulateForenamesCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $io->title("Chargement d'un fichier des prénoms");
-        $io->writeln("Les fichiers correspondent au résultat SparQL des deux requêtes suivantes : ");
+        $io->writeln("Les fichiers correspondent au résultat SparQL des deux requêtes suivantes téléchargé au format TSV puis déposé dans var/sparql : ");
         $io->title("Requête 1");
         $io->writeln("SELECT distinct ?forename (STR(?forenameLabelRaw) as ?forenameLabel)
 WHERE
@@ -66,7 +66,7 @@ WHERE
 
 
         $io->writeLn("");
-        $io->writeln("<info>Sélection du fichier contenant  les ISBN : </info>");
+        $io->writeln("<info>Sélection du fichier contenant  les résultats : </info>");
         $io->writeLn("");
 
         $helper = $this->getHelper('question');

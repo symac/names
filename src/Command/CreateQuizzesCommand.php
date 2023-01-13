@@ -28,14 +28,14 @@ class CreateQuizzesCommand extends Command
     private $pseudonameFinder;
     private $slugGenerator;
 
-    public function __construct(string $name = null, WikiClient $wikiClient, EntityManagerInterface $em, PseudonameFinder $pseudonameFinder, SlugGenerator $slugGenerator)
+    public function __construct(WikiClient $wikiClient, EntityManagerInterface $em, PseudonameFinder $pseudonameFinder, SlugGenerator $slugGenerator)
     {
         $this->wikiClient = $wikiClient;
         $this->em = $em;
         $this->pseudonameFinder = $pseudonameFinder;
         $this->slugGenerator = $slugGenerator;
 
-        parent::__construct($name);
+        parent::__construct();
     }
 
     protected function configure()

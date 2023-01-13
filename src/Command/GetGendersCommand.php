@@ -20,11 +20,11 @@ class GetGendersCommand extends Command
     protected $forenameRepository;
     private $em;
 
-    public function __construct(string $name = null, EntityManagerInterface $em, ForenameRepository $forenameRepository)
+    public function __construct(EntityManagerInterface $em, ForenameRepository $forenameRepository)
     {
         $this->forenameRepository = $forenameRepository;
         $this->em = $em;
-        parent::__construct($name);
+        parent::__construct();
     }
 
     protected function configure()
@@ -100,6 +100,8 @@ WHERE
                     $duration = microtime(true) - $start;
                     print "Import : $countUpdates - end flush [$duration]\n";
                     $start = microtime(true);
+                } elseif ( ($lineNumber % 50) == 0) {
+                    print "Skip 50\n";
                 }
                 $lineNumber++;
             }
