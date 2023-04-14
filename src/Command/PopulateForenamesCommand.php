@@ -133,14 +133,10 @@ WHERE
                     }
                 }
 
-                if (($countImports % 5000) == 0) {
-
+                if (($lineNumber % 5000) == 0) {
+                    $this->em->flush();
                     $duration = microtime(true) - $start;
-                    print "Import : $countImports - start flush [$duration]\n";
-                    $start = microtime(true);
-
-                    $duration = microtime(true) - $start;
-                    print "Import : $countImports - end flush [$duration]\n";
+                    print "Import : $countImports (Line $lineNumber) - [$duration]\n";
                     $start = microtime(true);
                 }
                 $lineNumber++;

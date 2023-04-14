@@ -91,17 +91,11 @@ WHERE
                     }
                 }
 
-                if ( ($countUpdates % 50) == 0) {
-                    print $countUpdates."\n";
-                    $duration = microtime(true) - $start;
-                    print "Import : $countUpdates - start flush [$duration]\n";
-                    $start = microtime(true);
+                if ( ($lineNumber % 500) == 0) {
                     $this->em->flush();
                     $duration = microtime(true) - $start;
-                    print "Import : $countUpdates - end flush [$duration]\n";
+                    print "Import : $countUpdates (Line $lineNumber): $duration\n";
                     $start = microtime(true);
-                } elseif ( ($lineNumber % 50) == 0) {
-                    print "Skip 50\n";
                 }
                 $lineNumber++;
             }
