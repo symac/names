@@ -16,9 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AjaxController extends AbstractController
 {
-    /**
-     * @Route("/ajax", name="ajax")
-     */
+    #[Route(path: '/ajax', name: 'ajax')]
     public function index()
     {
         return $this->render('ajax/index.html.twig', [
@@ -26,9 +24,7 @@ class AjaxController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/ajax/result/{name}", name="ajax_result")
-     */
+    #[Route(path: '/ajax/result/{name}', name: 'ajax_result')]
     public function result(EntityManagerInterface $em, ResultRepository $resultRepository, SlugGenerator $slugGenerator, PseudonameFinder $pseudonameFinder, string $name)
     {
         $output = [];
@@ -66,9 +62,7 @@ class AjaxController extends AbstractController
         return $this->json($output);
     }
 
-    /**
-     * @Route("/ajax/quizz", name="ajax_random_quizz")
-    */
+    #[Route(path: '/ajax/quizz', name: 'ajax_random_quizz')]
     public function quizz(QuizzRepository $quizzRepository) {
         $quizz = $quizzRepository->findRandom();
         return new JsonResponse($quizz);

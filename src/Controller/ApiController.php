@@ -13,9 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ApiController extends AbstractController
 {
-    /**
-     * @Route("/api", name="api")
-     */
+    #[Route(path: '/api', name: 'api')]
     public function index()
     {
         return $this->render('api/index.html.twig', [
@@ -23,9 +21,7 @@ class ApiController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/api/get/{query}", name="apiget")
-     */
+    #[Route(path: '/api/get/{query}', name: 'apiget')]
     public function getResult($query, ResultRepository $resultRepository, SlugGenerator $slugGenerator, EntityManagerInterface $em) {
         $slug = $slugGenerator->clean($query);
         $result = $resultRepository->findOneBy(['slug' => $slug]);

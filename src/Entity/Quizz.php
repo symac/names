@@ -4,76 +4,48 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\QuizzRepository")
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\QuizzRepository')]
 class Quizz implements \JsonSerializable
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     private $wikidata;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $answer;
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type: 'text', nullable: true)]
     private $question;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
+    #[ORM\Column(type: 'datetime')]
     private $creationDate;
 
-    /**
-     * @ORM\Column(type="string", length=10)
-     */
+    #[ORM\Column(type: 'string', length: 10)]
     private $secret;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $anagram;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Result")
-     */
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\Result')]
     private $Result;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $image;
 
-    /**
-     * @ORM\Column(type="string", length=512, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 512, nullable: true)]
     private $CommonsFilename;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\QuizzCategory", inversedBy="Quizzes")
-     */
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\QuizzCategory', inversedBy: 'Quizzes')]
     private $quizzCategory;
 
-    /**
-     * @ORM\Column(type="boolean", options={"default": true})
-     */
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private $visible;
 
-    /**
-     * @ORM\Column(type="integer", options={"default": 0})
-     */
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private $views;
 
     public function __construct()

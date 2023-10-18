@@ -19,9 +19,7 @@ use Symfony\Component\Validator\Constraints\Date;
 
 class IndexController extends AbstractController
 {
-    /**
-     * @Route("/", name="home")
-     */
+    #[Route(path: '/', name: 'home')]
     public function index(Request $request, SlugGenerator $slugGenerator, ResultRepository $resultRepository, EntityManagerInterface $em, QuizzRepository $quizzRepository)
     {
         $form = $this->createForm(SearchType::class);
@@ -72,9 +70,7 @@ class IndexController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/anagrams-of-{name}/{id}", name="permalink")
-     */
+    #[Route(path: '/anagrams-of-{name}/{id}', name: 'permalink')]
     public function permalink(Result $result, string $name)
     {
         $form = $this->createForm(SearchType::class);
@@ -88,9 +84,7 @@ class IndexController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/about", name="about")
-     */
+    #[Route(path: '/about', name: 'about')]
     public function about(EntityManagerInterface $em)
     {
         $form = $this->createForm(SearchType::class);

@@ -60,6 +60,7 @@ class PseudonameFinder
     private function getResults($slug, $query)
     {
         $outputResults = [];
+        dd($query);
         $stmt = $this->em->getConnection()->prepare($query . " LIMIT 0,1000000");
         $stmt->execute();
 

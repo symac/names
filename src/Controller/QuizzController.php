@@ -19,9 +19,7 @@ use Symfony\Component\Security\Http\Firewall\RemoteUserAuthenticationListener;
 
 class QuizzController extends AbstractController
 {
-    /**
-     * @Route("/quizz", name="quizz")
-     */
+    #[Route(path: '/quizz', name: 'quizz')]
     public function index()
     {
         return $this->render('quizz/index.html.twig', [
@@ -29,9 +27,7 @@ class QuizzController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/quizz/add", name="quizz_add_01")
-     */
+    #[Route(path: '/quizz/add', name: 'quizz_add_01')]
     public function add(Request $request, EntityManagerInterface $em)
     {
 
@@ -69,9 +65,7 @@ class QuizzController extends AbstractController
         return null;
     }
 
-    /**
-     * @Route("/quizz/add/{id}-{secret}", name="quizz_add_02_image_anagram")
-     */
+    #[Route(path: '/quizz/add/{id}-{secret}', name: 'quizz_add_02_image_anagram')]
     public function addSecond(Quizz $quizz, string $secret, ResultRepository $resultRepository, SlugGenerator $slugGenerator, EntityManagerInterface $em)
     {
         if ($quizz->getSecret() != $secret) {
@@ -101,9 +95,7 @@ class QuizzController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/quizz/add/{id}-{secret}/finalize", name="quizz_add_final")
-     */
+    #[Route(path: '/quizz/add/{id}-{secret}/finalize', name: 'quizz_add_final')]
     public function addFinal(Quizz $quizz, string $secret, EntityManagerInterface $em, Request $request, SlugGenerator $slugGenerator)
     {
 
@@ -129,9 +121,7 @@ class QuizzController extends AbstractController
         );
     }
 
-    /**
-     * @Route("/quizz/{secret}{id}", name="quizz_view", requirements={"secret"=".{10}"})
-     */
+    #[Route(path: '/quizz/{secret}{id}', name: 'quizz_view', requirements: ['secret' => '.{10}'])]
     public function view(Quizz $quizz, string $secret)
     {
         $form = $this->createForm(SearchType::class);
@@ -145,9 +135,7 @@ class QuizzController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/quizz/random", name="quizz_random")
-     */
+    #[Route(path: '/quizz/random', name: 'quizz_random')]
     public function random(QuizzRepository $quizzRepository, EntityManagerInterface $em)
     {
         $quizz = $quizzRepository->findRandom();
@@ -159,9 +147,7 @@ class QuizzController extends AbstractController
         );
     }
 
-    /**
-     * @Route("/quizz/setAnagram/{id?}/{anagram?}", name="quizz_set_anagram")
-     */
+    #[Route(path: '/quizz/setAnagram/{id?}/{anagram?}', name: 'quizz_set_anagram')]
     public function setAnagram(SlugGenerator $slugGenerator, QuizzRepository $quizzRepository, EntityManagerInterface $em, ResultRepository $resultRepository, Quizz $quizz = null, string $anagram = null)
     {
         if (!is_null($quizz)) {
@@ -186,9 +172,7 @@ class QuizzController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("quizz/delete/{id}", name="quizz_delete")
-     */
+    #[Route(path: 'quizz/delete/{id}', name: 'quizz_delete')]
     public function delete(Quizz $quizz, EntityManagerInterface $em) {
 
         $quizz->setVisible(false);

@@ -8,9 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints\Date;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\ResultRepository")
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\ResultRepository')]
 class Result
 {
     const STATUS_NEW = 0;
@@ -18,55 +16,38 @@ class Result
     const STATUS_FINISH = 2;
     const STATUS_ERROR = 3;
 
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     private $slug;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\ResultStep", mappedBy="Result")
-     */
+    #[ORM\OneToMany(targetEntity: 'App\Entity\ResultStep', mappedBy: 'Result')]
     private $resultSteps;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $status;
+    #[ORM\Column(type: 'integer')]
+    private $status = Result::STATUS_NEW;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     private $search;
 
     private $percentageDone;
     private $slugGenerator;
 
 
-    /**
-     * @ORM\Column(type="date", options={"default": "1970-01-01"})
-     */
+    #[ORM\Column(type: 'date', options: ['default' => '1970-01-01'])]
     private $createDate;
 
-    /**
-     * @ORM\Column(type="date", options={"default": "1970-01-01"})
-     */
+    #[ORM\Column(type: 'date', options: ['default' => '1970-01-01'])]
     private $viewDate;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Column(type: 'integer')]
     private $countAnagrams;
 
     public function __construct(SlugGenerator $slugGenerator)
     {
-        $this->status = Result::STATUS_NEW;
         $this->slugGenerator = $slugGenerator;
         $this->resultSteps = new ArrayCollection();
         $this->setCreateDate(new \DateTime());
@@ -84,7 +65,7 @@ class Result
         return $this->slug;
     }
 
-    private function setSlug(string $slug): self
+    public function setSlug(string $slug): self
     {
         $this->slug = $slug;
 

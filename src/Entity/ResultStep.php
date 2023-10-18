@@ -4,37 +4,25 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\ResultStepRepository")
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\ResultStepRepository')]
 class ResultStep
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Column(type: 'integer')]
     private $forenameLength;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Result", inversedBy="resultSteps")
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\Result', inversedBy: 'resultSteps')]
+    #[ORM\JoinColumn(nullable: false)]
     private $Result;
 
-    /**
-     * @ORM\Column(type="array", nullable=true)
-     */
+    #[ORM\Column(type: 'array', nullable: true)]
     private $anagrams = [];
 
-    /**
-     * @ORM\Column(type="float", nullable=true)
-     */
+    #[ORM\Column(type: 'float', nullable: true)]
     private $duration;
 
     public function getId(): ?int
