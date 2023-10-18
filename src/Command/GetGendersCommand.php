@@ -24,6 +24,7 @@ class GetGendersCommand extends Command
     {
         $this->forenameRepository = $forenameRepository;
         $this->em = $em;
+        $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
         parent::__construct();
     }
 
@@ -93,6 +94,7 @@ WHERE
 
                 if ( ($lineNumber % 500) == 0) {
                     $this->em->flush();
+                    $this->em->clear();
                     $duration = microtime(true) - $start;
                     print "Import : $countUpdates (Line $lineNumber): $duration\n";
                     $start = microtime(true);

@@ -27,6 +27,7 @@ class PopulateSurnamesCommand extends Command
     {
         $this->slugGenerator = $slugGenerator;
         $this->em = $em;
+        $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
         parent::__construct();
     }
     protected function configure()
@@ -52,7 +53,7 @@ WHERE
 ");
 
         $io->writeLn("");
-        $io->writeln("<info>Sélection du fichier contenant  les ISBN : </info>");
+        $io->writeln("<info>Sélection du fichier contenant  les noms de famille : </info>");
         $io->writeLn("");
 
 
@@ -94,6 +95,7 @@ WHERE
                     print "Ligne : $lineNumber - start flush [$duration]\n";
                     $start = microtime(true);
                     $this->em->flush();
+                    $this->em->clear();
                     $duration = microtime(true) - $start;
                     print "Ligne : $lineNumber - end flush [$duration]\n";
                     $start = microtime(true);

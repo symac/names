@@ -135,6 +135,7 @@ WHERE
 
                 if (($lineNumber % 5000) == 0) {
                     $this->em->flush();
+                    $this->em->clear();
                     $duration = microtime(true) - $start;
                     print "Import : $countImports (Line $lineNumber) - [$duration]\n";
                     $start = microtime(true);
