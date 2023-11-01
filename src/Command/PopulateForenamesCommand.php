@@ -39,7 +39,7 @@ class PopulateForenamesCommand extends Command
             ->setDescription('Load from TSV File');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $io->title("Chargement d'un fichier des prénoms");

@@ -155,11 +155,13 @@ class Quizz implements \JsonSerializable
         return $this;
     }
 
-    public function imageFilename(): string {
-        return $this->getSecret().$this->getId().".jpg";
+    public function imageFilename(): string
+    {
+        return $this->getSecret() . $this->getId() . ".jpg";
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): array
+    {
         return [
             "wikidata" => $this->getWikidata(),
             "question" => $this->getQuestion(),

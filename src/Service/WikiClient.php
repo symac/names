@@ -6,16 +6,23 @@ namespace App\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Validator\Constraints\Json;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class WikiClient
 {
-    public function __construct(EntityManagerInterface $em, SlugGenerator $slugGenerator)
+    private $httpClient;
+    public function __construct(EntityManagerInterface $em, SlugGenerator $slugGenerator, HttpClientInterface $httpClient)
     {
+        $this->httpClient = $httpClient;
     }
 
     public function getWikidataJson(string $Q) {
         try {
-            $content = file_get_contents("https://www.wikidata.org/w/api.php?action=wbgetentities&ids=".$Q."&props=claims|labels|descriptions&format=json");
+            $response = $this->httpClient->request(
+                'GET',
+                'https://www.wikidata.org/w/api.php?action=wbgetentities&ids='.$Q.'&props=claims|labels|descriptions&format=json'
+            );
+            $content = $response->getContent();
             $json = json_decode($content);
             if ($json->{'success'} != 1) {
                 return null;

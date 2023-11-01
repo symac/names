@@ -4,7 +4,7 @@
 
 {% block body %}
     <h1>Find anagrams of any name</h1>
-    <div style="text-align: center;">
+    <div style="text-align: center; margin-bottom: 2em;">
         {{ form_start(form) }}
         <label>
             Works best when you enter a surname and a forename:
@@ -15,8 +15,8 @@
         {{ form_end(form) }}
     </div>
 
-    <h1>Quizz</h1>
+<!--    <h1>Quizz</h1>
     {% include "quizz/embed.html.twig" with {pageName: "home"} %}
-    </div>
+    </div> -->
 
 {% endblock %}

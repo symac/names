@@ -34,6 +34,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'searchX', columns: ['X'])]
 #[ORM\Index(name: 'searchY', columns: ['Y'])]
 #[ORM\Index(name: 'searchZ', columns: ['Z'])]
+#[ORM\Index(name: 'searchLettersIndex', columns: ['letters_index'])]
+
 #[ORM\Entity(repositoryClass: 'App\Repository\SurnameRepository')]
 class Surname
 {
@@ -136,6 +138,9 @@ class Surname
     private $language;
 
     private $slugGenerator;
+
+    #[ORM\Column(length: 26)]
+    private ?string $lettersIndex = null;
     public function __construct(SlugGenerator $slugGenerator = null)
     {
         $this->slugGenerator = $slugGenerator;
@@ -205,5 +210,16 @@ class Surname
         foreach (count_chars($this->labels, 1) as $i => $val) {
             $this->{chr($i)} = $val;
         }
+    }
+
+    public function getLettersIndex(): ?string
+    {
+        return $this->lettersIndex;
+    }
+
+    public function setLettersIndex(string $lettersIndex): static
+    {
+        $this->lettersIndex = $lettersIndex;
+        return $this;
     }
 }

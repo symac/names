@@ -52,13 +52,11 @@ class CreateQuizzesCommand extends Command
         $helper = $this->getHelper('question');
 
         $question = new ChoiceQuestion(
-            'Please select your favorite color (defaults to red)',
+            'Quelle catégorie voulez-vous remplir ?',
             $quizzCategories,
             0
         );
-        $categoryName = $helper->ask($input, $output, $question);
-
-        $quizzCategory = $this->em->getRepository(QuizzCategory::class)->findOneBy(["name" => $categoryName]);
+        $quizzCategory = $helper->ask($input, $output, $question);
 
         $client = new SparqlClient();
         $client->setEndpointRead("https://query.wikidata.org/sparql");
@@ -89,14 +87,13 @@ class CreateQuizzesCommand extends Command
             } else {
                 $informations = $this->wikiClient->getWikidataJson($wikidata);
                 $label = $this->wikiClient->extractLabel($informations, $wikidata);
-
                 if (strlen($label) < 10) {
                     $io->writeln("<error>Label is too short</error>");
                 } else {
                     $quizz = new Quizz();
                     $quizz->setQuizzCategory($quizzCategory);
                     $quizz->setWikidata($wikidata);
-                    $io->title("$label (".$row["sitelinks"].")");
+                    $io->title("$label (" . $row["sitelinks"] . ")");
 
                     $io->writeln("<info>Building results</info>");
                     $result = new Result($this->slugGenerator);
@@ -108,33 +105,35 @@ class CreateQuizzesCommand extends Command
                         $duration = microtime(true) - $start;
                         $resultStep = $result->addAnagrams($anagrams, $i, $duration);
                         $this->em->persist($resultStep);
-                        $io->writeln("Search for $i => ".sizeof($resultStep->getAnagrams()));
+                        $io->writeln("Search for $i => " . sizeof($resultStep->getAnagrams()));
                         $count += sizeof($resultStep->getAnagrams());
                     }
                     $io->writeln("$count anagrams found\n\n");
-                    $result->setStatus(Result::STATUS_FINISH);
-                    $this->em->persist($result);
+                    if ($count > 0) {
+                        $result->setStatus(Result::STATUS_FINISH);
+                        $this->em->persist($result);
 
-                    $io->writeln("<info>Set answer</info>");
-                    $quizz->setAnswer($label);
-                    $description = $this->wikiClient->extractDescription($informations, $wikidata);
-                    $quizz->setQuestion($description);
+                        $io->writeln("<info>Set answer</info>");
+                        $quizz->setAnswer($label);
+                        $description = $this->wikiClient->extractDescription($informations, $wikidata);
+                        $quizz->setQuestion($description);
 
-                    $io->writeln("<info>Downloading image</info>");
-                    $commonsImageName = $this->wikiClient->extractImageName($informations, $wikidata);
-                    if (!is_null($commonsImageName)) {
-                        $quizz->setCommonsFilename($commonsImageName);
+                        $io->writeln("<info>Downloading image</info>");
+                        $commonsImageName = $this->wikiClient->extractImageName($informations, $wikidata);
+                        if (!is_null($commonsImageName)) {
+                            $quizz->setCommonsFilename($commonsImageName);
+                        }
+
+                        try {
+                            $localImageName = $this->wikiClient->getThumbnailUrl($informations, $wikidata);
+                            $quizz->setImage($localImageName);
+                        } catch (\Exception $e) {
+                            $io->writeln("<error>Error download</error>");
+                        }
+
+                        $this->em->persist($quizz);
+                        $this->em->flush();
                     }
-
-                    try {
-                        $localImageName = $this->wikiClient->getThumbnailUrl($informations, $wikidata);
-                        $quizz->setImage($localImageName);
-                    } catch (\Exception $e) {
-                        $io->writeln("<error>Error download</error>");
-                    }
-
-                    $this->em->persist($quizz);
-                    $this->em->flush();
                 }
             }
 

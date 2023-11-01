@@ -36,6 +36,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'searchX', columns: ['X'])]
 #[ORM\Index(name: 'searchY', columns: ['Y'])]
 #[ORM\Index(name: 'searchZ', columns: ['Z'])]
+#[ORM\Index(name: 'searchLettersIndex', columns: ['letters_index'])]
 #[ORM\Entity(repositoryClass: 'App\Repository\ForenameRepository')]
 class Forename
 {
@@ -145,6 +146,9 @@ class Forename
     #[ORM\Column(type: 'smallint', nullable: true)]
     private $gender;
 
+    #[ORM\Column(length: 26, nullable: true)]
+    private ?string $lettersIndex = null;
+
     public function __construct(SlugGenerator $slugGenerator = null)
     {
         $this->slugGenerator = $slugGenerator;
@@ -181,7 +185,7 @@ class Forename
     public function appendWikidata(string $wikidata): self
     {
         $wikidata = $this->cleanWikidata($wikidata);
-        $this->setWikidata($this->getWikidata()."#".$wikidata);
+        $this->setWikidata($this->getWikidata() . "#" . $wikidata);
         return $this;
     }
 
@@ -307,10 +311,24 @@ class Forename
         ) {
             // Getting MALE or FEMALE when BOTH already set, nothing to do
             return false;
+        } elseif ($convertedType == Forename::GENDER_BOTH) {
+            $this->setGender($convertedType);
         } else {
             print $Q . "\n";
             print $convertedType . "\n";
+            print $existingGenderType . "\n";
             print "DEALLL\n";
         }
+    }
+
+    public function getLettersIndex(): ?string
+    {
+        return $this->lettersIndex;
+    }
+
+    public function setLettersIndex(string $lettersIndex): static
+    {
+        $this->lettersIndex = $lettersIndex;
+        return $this;
     }
 }

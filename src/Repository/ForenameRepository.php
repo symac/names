@@ -26,6 +26,7 @@ class ForenameRepository extends ServiceEntityRepository
         {
             return $forenames;
         }
+        return [];
 
         // Looking for a forename with multiple wikidata
         $qb = $this->createQueryBuilder('f');
