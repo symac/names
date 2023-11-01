@@ -76,7 +76,7 @@ class IndexController extends AbstractController
         $form = $this->createForm(SearchType::class);
 
         if ($result->getSearchSlugified() != $name) {
-            throw $this->createNotFoundException('The product does not exist');
+            throw $this->createNotFoundException('Erreur dans l\'adresse');
         }
         return $this->render('index/result.html.twig', [
             'result' => $result,

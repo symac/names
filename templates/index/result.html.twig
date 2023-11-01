@@ -41,7 +41,8 @@
     {% if result.finished %}
         <h1><span class="strong">{{ result.search }}</span> has {{ result.countAnagrams }} anagrams</h1>
     {% else %}
-        <h1><span class="strong">{{ result.search }}</span> has <span id="numFound">0</span> anagrams <span id="sofar">so far</span></h1>
+        <h1><span class="strong">{{ result.search }}</span> has <span id="numFound">0</span> anagrams <span id="sofar">so far</span>
+        </h1>
     {% endif %}
     </h1>
     <div id="share">Share this result : <a
@@ -54,15 +55,27 @@
         </p>
     </div>
     {% if result.finished %}
+        {% set surname = null %}
         <div id="resultDiv">
             <ul id="resultList">
                 {% for anagram in result.getSortedAnagrams %}
-                    <li class="gender gender{{ anagram.g }}">{{ anagram.s }} {{ anagram.f }}</li>
+                    {% if surname != anagram.s %}
+                        {% if surname is not null %}
+                            </ul>
+                        {% endif %}
+
+                        <li class="gender gender{% if anagram.g is null %}3{% else %}{{ anagram.g }}{% endif %}">{{ anagram.s }} <ul>
+                        {% set surname = anagram.s %}
+                    {% endif %}
+                    <li>{{ anagram.f }}</li>
                 {% endfor %}
             </ul>
         </div>
     {% elseif result.slug == "" %}
-        <p style="border:1px solid red; padding:1em;">It seems the name you entered is either too short either doesn't contain any character that we have been able to convert to latin-1 characters. At the moment our algorithm is not able to cope with them, we are sorry.<br/><br/>Please <a href="{{ url("home") }}">try again with another name</a>!</p>
+        <p style="border:1px solid red; padding:1em;">It seems the name you entered is either too short either doesn't
+            contain any character that we have been able to convert to latin-1 characters. At the moment our algorithm
+            is not able to cope with them, we are sorry.<br/><br/>Please <a href="{{ url("home") }}">try again with
+                another name</a>!</p>
     {% else %}
         <div id="loader">Loading...</div>
 

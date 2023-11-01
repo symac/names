@@ -27,22 +27,18 @@
                         progressBar.style.width = json.percent + '%';
 
                         if (json.status == 2) {
-                            document.querySelector("#progressBar").style.display = "none";
-                            {% if result.id %}
-                            document.querySelector("#numFound").textContent = json.totalCount;
-                            {% endif %}
-                            document.querySelector("#share").style.display = "block";
-                            document.querySelector("#filter").style.display = "block";
-                            document.querySelector("#loader").style.display = "none";
-                            document.querySelector("#sofar").innerHTML = "&#10003;";
-                            sortList("resultList");
+                            window.location.href = "{{ url("permalink", {name: result.searchSlugified, id: result.id}) }}";
                         } else if (json.status == 1) {
                             for (let i = 0; i < json.results.length; i++) {
                                 let element = document.createElement("li");
                                 element.textContent = json.results[i]['s'] + " " + json.results[i]['f'];
                                 {% if quizz is defined %}
                                 {% endif %}
-                                element.className = "gender" + json.results[i]["g"];
+                                if (json.results[i]["g"] == null) {
+                                    element.className = "gender3";
+                                } else {
+                                    element.className = "gender" + json.results[i]["g"];
+                                }
                                 element.classList.add("gender");
                                 document.querySelector("#resultList").appendChild(element);
                             }
